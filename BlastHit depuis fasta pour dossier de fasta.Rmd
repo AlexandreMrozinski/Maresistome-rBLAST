@@ -1,0 +1,148 @@
+---
+title: "Blast hit depuis fasta pour un dossier de fasta"
+output: html_document
+date: "2024-01-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Base https://rsh249.github.io/bioinformatics/rBlast.html
+
+```{r}
+#prepare for a BLAST query
+file_list <- list.files('/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
+
+dna <- readDNAStringSet(file_list, format='fasta')
+
+bl <- blast(db="/Users/alexa/OneDrive/Documents/BioInfo/16SMicrobialDB/16S_ribosomal_RNA")
+
+#Run BLAST query
+
+cl <- predict(bl, dna)
+
+cl[1:5,]
+#to view first 5 hits
+summary(cl)
+#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
+```
+
+
+```{r}
+accid = as.character(cl$sseqid)
+```
+
+```{r}
+#NE LANCER QUE UNE FOIS
+libdir='data'
+dir.create(libdir)
+setwd(libdir)
+getNamesAndNodes()
+getAccession2taxid(types=c('nucl_gb'))
+getAccession2taxid()
+system("gunzip *.gz")
+read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
+print(paste('taxonomizr database built and located at', getwd(), sep=' '))
+
+```
+
+```{r}
+#C:\Users\alexa\OneDrive\Documents\data
+taxaNodes<-read.nodes.sql("data/nodes.dmp")
+taxaNames<-read.names.sql("data/names.dmp")
+```
+
+```{r}
+#takes accession number and gets the taxonomic ID
+ids<-accessionToTaxa(accid, '/Users/alexa/OneDrive/Documents/BioInfo/data/accessionTaxa.sql')
+
+#taxlist displays the taxonomic names from each ID #
+taxlist=getTaxonomy(ids, taxaNodes, taxaNames)
+```
+
+```{r}
+cltax=cbind(cl,taxlist) #bind BLAST hits and taxonomy table
+colnames(cltax)
+cltax
+```
+
+```{r}
+# Group by 'SubjectID' and filter for the row with the highest 'pident' within each group
+filtered_cltax <- cltax %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+
+# Display the resulting dataframe
+filtered_cltax
+```
+
+```{r}
+#take the taxonomic names that have above a 99.5% identity and place in new data set to manipulate
+newdata <- subset(filtered_cltax, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+print(newdata)
+```
+```{r}
+newdata2 <- subset(filtered_cltax, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+# Emplacement des fichiers .fa
+chemin_du_dossier <- "/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/VerveurEau"
+
+# Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
+lire_fasta <- function(qseqid, chemin_du_dossier) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers <- list.files(chemin_du_dossier, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers) > 0) {
+        seqs <- readDNAStringSet(fichiers[1], format = "fasta")
+        return(as.character(seqs))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+# Ajouter une colonne au DataFrame avec le contenu des fichiers FASTA
+newdata2$sequence <- sapply(newdata2$qseqid, lire_fasta, chemin_du_dossier)
+
+# Ajouter une colonne avec la longueur des séquences dans contenu_fasta
+newdata2$longueur_sequence_pb <- sapply(newdata2$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+newdata2 <- newdata2[, c(names(newdata2)[names(newdata2) != "sequence"], "sequence")]
+
+# Afficher le DataFrame mis à jour
+print(newdata2)
+```
+
+```{r}
+# Sauvegarder newdata au format CSV
+write.csv(newdata2, "/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/newdata2.csv", row.names = FALSE)
+
+```
+
+
+```{r}
+#creates plot of selected dataset comparing family id and percent identity 
+ggplot(data=newdata) + aes(x = species, y = pident) +
+  geom_point(alpha=0.3, color="tomato", position = "jitter") +
+  geom_boxplot(alpha=0) + coord_flip()
+```
+
+```{r}
+#ggplot for top hits or percent identity of each family
+tab <- ggplot(data=filtered_cltax) + 
+  geom_boxplot(aes(x=species, y=pident)) + 
+  theme(axis.text.x = element_text(angle=90)) +
+  ylim(c(95,100)) 
+
+print(tab)
+```
+
+```{r}
+#Comparing alignment length for each family 
+ggplot(data=cltax) + 
+  geom_boxplot(aes(x=species, y=length)) + 
+  theme(axis.text.x = element_text(angle=90))
+```

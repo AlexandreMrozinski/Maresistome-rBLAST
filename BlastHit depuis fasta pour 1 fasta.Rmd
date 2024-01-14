@@ -1,0 +1,90 @@
+---
+title: "Blast hit depuis fasta pour 1 fasta"
+output: html_document
+date: "2024-01-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Base https://rsh249.github.io/bioinformatics/rBlast.html
+
+```{r}
+#prepare for a BLAST query
+dna <- readDNAStringSet('/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/VerveurEau/VE-25-Premixed.fa', format='fasta')
+
+bl <- blast(db="/Users/alexa/OneDrive/Documents/BioInfo/16SMicrobialDB/16S_ribosomal_RNA")
+
+#Run BLAST query
+#cl <- predict(bl, dna[1:10])
+cl <- predict(bl, dna)
+
+cl[1:5,]
+#to view first 5 hits
+summary(cl)
+#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
+```
+
+```{r}
+accid = as.character(cl$sseqid)
+```
+
+```{r}
+libdir='data'
+dir.create(libdir)
+setwd(libdir)
+getNamesAndNodes()
+getAccession2taxid(types=c('nucl_gb'))
+getAccession2taxid()
+system("gunzip *.gz")
+read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
+print(paste('taxonomizr database built and located at', getwd(), sep=' '))
+
+```
+
+```{r}
+#C:\Users\alexa\OneDrive\Documents\data
+taxaNodes<-read.nodes.sql("/Users/alexa/OneDrive/Documents/BioInfo/data/nodes.dmp")
+taxaNames<-read.names.sql("/Users/alexa/OneDrive/Documents/BioInfo/data/names.dmp")
+```
+
+```{r}
+#takes accession number and gets the taxonomic ID
+ids<-accessionToTaxa(accid, '/Users/alexa/OneDrive/Documents/BioInfo/data/accessionTaxa.sql')
+
+#taxlist displays the taxonomic names from each ID #
+taxlist=getTaxonomy(ids, taxaNodes, taxaNames)
+```
+
+```{r}
+cltax=cbind(cl,taxlist) #bind BLAST hits and taxonomy table
+colnames(cltax)
+cltax
+```
+
+```{r}
+#ggplot for top hits or percent identity of each family
+ggplot(data=cltax) + 
+  geom_boxplot(aes(x=genus, y=pident)) + 
+  theme(axis.text.x = element_text(angle=90)) +
+  ylim(c(85,100))
+
+#Comparing alignment length for each family 
+ggplot(data=cltax) + 
+  geom_boxplot(aes(x=family, y=Alignment.Length)) + 
+  theme(axis.text.x = element_text(angle=90))
+```
+
+```{r}
+#take the taxonomic names that have above a 95% identity and place in new data set to manipulate
+newdata <- subset(cltax, pident >= 99.5, 
+                  select=c(qseqid, species, pident))
+#creates plot of selected dataset comparing family id and percent identity 
+ggplot(data=newdata) + aes(x = species, y = pident) +
+  geom_point(alpha=0.3, color="tomato", position = "jitter") +
+  geom_boxplot(alpha=0) + coord_flip()
+
+print(newdata)
+```
+
