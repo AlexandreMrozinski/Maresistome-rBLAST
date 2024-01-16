@@ -9,14 +9,59 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 #Base https://rsh249.github.io/bioinformatics/rBlast.html
+#Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+
+```{r library, include=FALSE}
+library(DECIPHER)
+library(rmarkdown)
+library(knitr)
+library(phyloseq)
+library(dada2)
+library(DECIPHER)
+library(phangorn)
+library(ggplot2)
+library(gridExtra)
+library(shiny)
+library(miniUI)
+library(caret)
+library(pls)
+library(e1071)
+library(ggplot2)
+library(randomForest)
+library(dplyr)
+library(ggrepel)
+#library(nlme)
+library(devtools)
+library(reshape2)
+library(PMA)
+#library(structSSI)
+library(ade4)
+library(ggnetwork)
+library(intergraph)
+library(scales)
+library(genefilter)
+library(impute)
+library(phyloseqGraphTest)
+library(Biostrings)
+library(RSQLite)
+library(parallel)
+library(ape)
+library(taxonomizr)
+library('rBLAST')
+```
+
+```{r}
+#Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
+```
 
 ```{r}
 #prepare for a BLAST query
-file_list <- list.files('/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
+file_list <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
 
 dna <- readDNAStringSet(file_list, format='fasta')
 
-bl <- blast(db="/Users/alexa/OneDrive/Documents/BioInfo/16SMicrobialDB/16S_ribosomal_RNA")
+bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
 
 #Run BLAST query
 
@@ -27,7 +72,6 @@ cl[1:5,]
 summary(cl)
 #shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
 ```
-
 
 ```{r}
 accid = as.character(cl$sseqid)
@@ -48,14 +92,13 @@ print(paste('taxonomizr database built and located at', getwd(), sep=' '))
 ```
 
 ```{r}
-#C:\Users\alexa\OneDrive\Documents\data
-taxaNodes<-read.nodes.sql("data/nodes.dmp")
-taxaNames<-read.names.sql("data/names.dmp")
+taxaNodes<-read.nodes.sql("/Users/amrozins/Documents/workflow/data/nodes.dmp")
+taxaNames<-read.names.sql("/Users/amrozins/Documents/workflow/data/names.dmp")
 ```
 
 ```{r}
 #takes accession number and gets the taxonomic ID
-ids<-accessionToTaxa(accid, '/Users/alexa/OneDrive/Documents/BioInfo/data/accessionTaxa.sql')
+ids<-accessionToTaxa(accid, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
 
 #taxlist displays the taxonomic names from each ID #
 taxlist=getTaxonomy(ids, taxaNodes, taxaNames)
@@ -84,12 +127,13 @@ newdata <- subset(filtered_cltax,
 
 print(newdata)
 ```
+
 ```{r}
 newdata2 <- subset(filtered_cltax, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
 
 # Emplacement des fichiers .fa
-chemin_du_dossier <- "/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/VerveurEau"
+chemin_du_dossier <- "/Users/amrozins/Documents/workflow/FASTA/VerveurEau"
 
 # Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
 lire_fasta <- function(qseqid, chemin_du_dossier) {
