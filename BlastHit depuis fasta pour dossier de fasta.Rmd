@@ -51,33 +51,6 @@ library('rBLAST')
 ```
 
 ```{r}
-#Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+
-Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
-```
-
-```{r}
-#prepare for a BLAST query
-file_list <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
-
-dna <- readDNAStringSet(file_list, format='fasta')
-
-bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
-
-#Run BLAST query
-
-cl <- predict(bl, dna)
-
-cl[1:5,]
-#to view first 5 hits
-summary(cl)
-#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
-```
-
-```{r}
-accid = as.character(cl$sseqid)
-```
-
-```{r}
 #NE LANCER QUE UNE FOIS
 libdir='data'
 dir.create(libdir)
@@ -88,7 +61,47 @@ getAccession2taxid()
 system("gunzip *.gz")
 read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
 print(paste('taxonomizr database built and located at', getwd(), sep=' '))
+```
 
+```{r}
+#Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
+```
+
+```{r}
+#prepare for a BLAST query
+file_list_VerveurEau <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurSedi <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurSedi', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurGD <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurGD', pattern = "\\.fa$", full.names = TRUE)
+
+dna_VerveurEau <- readDNAStringSet(file_list_VerveurEau, format='fasta')
+dna_VerveurSedi <- readDNAStringSet(file_list_VerveurSedi, format='fasta')
+dna_VerveurGD <- readDNAStringSet(file_list_VerveurGD, format='fasta')
+
+bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
+
+#Run BLAST query
+
+cl_VerveurEau <- predict(bl, dna_VerveurEau)
+cl_VerveurSedi <- predict(bl, dna_VerveurSedi)
+cl_VerveurGD <- predict(bl, dna_VerveurGD)
+
+cl_VerveurEau[1:5,]
+#to view first 5 hits
+summary(cl_VerveurEau)
+#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
+
+cl_VerveurSedi[1:5,]
+summary(cl_VerveurSedi)
+
+cl_VerveurGD[1:5,]
+summary(cl_VerveurGD)
+```
+
+```{r}
+accid_VerveurEau = as.character(cl_VerveurEau$sseqid_VerveurEau)
+accid_VerveurSedi = as.character(cl_VerveurSedi$sseqid_VerveurSedi)
+accid_VerveurGD = as.character(cl_VerveurGD$sseqid_VerveurGD)
 ```
 
 ```{r}
@@ -98,19 +111,50 @@ taxaNames<-read.names.sql("/Users/amrozins/Documents/workflow/data/names.dmp")
 
 ```{r}
 #takes accession number and gets the taxonomic ID
-ids<-accessionToTaxa(accid, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
-
+ids_VerveurEau<-accessionToTaxa(accid_VerveurEau, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
 #taxlist displays the taxonomic names from each ID #
-taxlist=getTaxonomy(ids, taxaNodes, taxaNames)
+taxlist_VerveurEau=getTaxonomy(ids_VerveurEau, taxaNodes, taxaNames)
+
+
+ids_VerveurSedi<-accessionToTaxa(accid_VerveurSedi, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurSedi=getTaxonomy(ids_VerveurSedi, taxaNodes, taxaNames)
+
+ids_VerveurGD<-accessionToTaxa(accid_VerveurGD, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurGD=getTaxonomy(ids_VerveurGD, taxaNodes, taxaNames)
 ```
 
 ```{r}
-cltax=cbind(cl,taxlist) #bind BLAST hits and taxonomy table
-colnames(cltax)
-cltax
+#Résultats Total VerveurEau
+cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurEau)
+cltax_VerveurEau
 ```
 
 ```{r}
+#Résultats Total VerveurEau
+cltax_VerveurSedi=cbind(cl_VerveurSedi,taxlist_VerveurSedi) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurSedi)
+cltax_VerveurSedi
+```
+
+```{r}
+#Résultats Total VerveurEau
+cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurEau)
+cltax_VerveurEau
+```
+
+```{r}
+# Tri des résultats par qseqid et pident décroissants
+cltax_sorted <- cltax %>% arrange(qseqid, desc(pident))
+
+# Sélection des 5 premiers résultats pour chaque qseqid
+cltax5 <- cltax_sorted %>% group_by(qseqid) %>% slice_head(n = 5)
+```
+
+
+```{r}
+#Ne prend pour chaque fasta que le résultat avec le max de % identity 
 # Group by 'SubjectID' and filter for the row with the highest 'pident' within each group
 filtered_cltax <- cltax %>%
   group_by(qseqid) %>%
