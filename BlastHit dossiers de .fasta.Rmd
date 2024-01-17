@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 #Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
+
 ```{r, packages mais il doit en manquer, voir avec les library}
 install.packages(c("VennDiagram", "VennCounts"))
 install.packages("readxl")
