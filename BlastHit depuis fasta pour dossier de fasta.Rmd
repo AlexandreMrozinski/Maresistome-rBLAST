@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r library, include=FALSE}
 library(DECIPHER)
+library(openxlsx)
 library(rmarkdown)
 library(knitr)
 library(phyloseq)
@@ -99,9 +100,9 @@ summary(cl_VerveurGD)
 ```
 
 ```{r}
-accid_VerveurEau = as.character(cl_VerveurEau$sseqid_VerveurEau)
-accid_VerveurSedi = as.character(cl_VerveurSedi$sseqid_VerveurSedi)
-accid_VerveurGD = as.character(cl_VerveurGD$sseqid_VerveurGD)
+accid_VerveurEau = as.character(cl_VerveurEau$sseqid)
+accid_VerveurSedi = as.character(cl_VerveurSedi$sseqid)
+accid_VerveurGD = as.character(cl_VerveurGD$sseqid)
 ```
 
 ```{r}
@@ -124,69 +125,97 @@ taxlist_VerveurGD=getTaxonomy(ids_VerveurGD, taxaNodes, taxaNames)
 ```
 
 ```{r}
-#Résultats Total VerveurEau
+#Résultats Totaux VerveurEau
 cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
 colnames(cltax_VerveurEau)
 cltax_VerveurEau
 ```
 
 ```{r}
-#Résultats Total VerveurEau
+#Résultats Totaux VerveurEau
 cltax_VerveurSedi=cbind(cl_VerveurSedi,taxlist_VerveurSedi) #bind BLAST hits and taxonomy table
 colnames(cltax_VerveurSedi)
 cltax_VerveurSedi
 ```
 
 ```{r}
-#Résultats Total VerveurEau
-cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
-colnames(cltax_VerveurEau)
-cltax_VerveurEau
+#Résultats Totaux VerveurEau
+cltax_VerveurGD=cbind(cl_VerveurGD,taxlist_VerveurGD) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurGD)
+cltax_VerveurGD
 ```
 
 ```{r}
 # Tri des résultats par qseqid et pident décroissants
-cltax_sorted <- cltax %>% arrange(qseqid, desc(pident))
+cltax_sorted_VerveurEau <- cltax_VerveurEau %>% arrange(qseqid, desc(pident))
 
 # Sélection des 5 premiers résultats pour chaque qseqid
-cltax5 <- cltax_sorted %>% group_by(qseqid) %>% slice_head(n = 5)
+cltax5_VerveurEau <- cltax_sorted_VerveurEau %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurEau)
 ```
 
+```{r}
+cltax_sorted_VerveurSedi <- cltax_VerveurSedi %>% arrange(qseqid, desc(pident))
+cltax5_VerveurSedi <- cltax_sorted_VerveurSedi %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurSedi)
+```
 
 ```{r}
-#Ne prend pour chaque fasta que le résultat avec le max de % identity 
-# Group by 'SubjectID' and filter for the row with the highest 'pident' within each group
-filtered_cltax <- cltax %>%
+cltax_sorted_VerveurGD <- cltax_VerveurGD %>% arrange(qseqid, desc(pident))
+cltax5_VerveurGD <- cltax_sorted_VerveurGD %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurGD)
+```
+
+```{r}
+#Ne prend pour chaque fasta que le résultat avec le max de % identity (pident)
+filtered_cltax_VerveurEau <- cltax_sorted_VerveurEau %>%
   group_by(qseqid) %>%
   filter(pident == max(pident))
 
-# Display the resulting dataframe
-filtered_cltax
+filtered_cltax_VerveurEau
 ```
 
 ```{r}
-#take the taxonomic names that have above a 99.5% identity and place in new data set to manipulate
-newdata <- subset(filtered_cltax, 
-                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-
-print(newdata)
+filtered_cltax_VerveurSedi <- cltax_sorted_VerveurSedi %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurSedi
 ```
 
 ```{r}
-newdata2 <- subset(filtered_cltax, 
+filtered_cltax_VerveurGD <- cltax_sorted_VerveurGD %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurGD
+```
+
+
+#Pour sortir les TabRésultats
+
+```{r}
+#Pour sortir uniquement les résultats de taxo
+data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
 
-# Emplacement des fichiers .fa
-chemin_du_dossier <- "/Users/amrozins/Documents/workflow/FASTA/VerveurEau"
+print(data_VerveurEau)
+```
+
+```{r}
+#Résultats de taxo et ajoutes la longueur de la séquence et la séquence
+data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+# Emplacement des fichiers .fasta
+chemin_du_dossier_VerveurEau <- "/Users/amrozins/Documents/workflow/FASTA/VerveurEau"
 
 # Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
-lire_fasta <- function(qseqid, chemin_du_dossier) {
+lire_fasta_VerveurEau <- function(qseqid, chemin_du_dossier_VerveurEau) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
-    fichiers <- list.files(chemin_du_dossier, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    fichiers_VerveurEau <- list.files(chemin_du_dossier_VerveurEau, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
     
-    if (length(fichiers) > 0) {
-        seqs <- readDNAStringSet(fichiers[1], format = "fasta")
-        return(as.character(seqs))
+    if (length(fichiers_VerveurEau) > 0) {
+        seqs_VerveurEau <- readDNAStringSet(fichiers_VerveurEau[1], format = "fasta")
+        return(as.character(seqs_VerveurEau))
     } else {
         cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
         return(NA)
@@ -194,21 +223,117 @@ lire_fasta <- function(qseqid, chemin_du_dossier) {
 }
 
 # Ajouter une colonne au DataFrame avec le contenu des fichiers FASTA
-newdata2$sequence <- sapply(newdata2$qseqid, lire_fasta, chemin_du_dossier)
+data_VerveurEau$sequence <- sapply(data_VerveurEau$qseqid, lire_fasta_VerveurEau, chemin_du_dossier_VerveurEau)
 
 # Ajouter une colonne avec la longueur des séquences dans contenu_fasta
-newdata2$longueur_sequence_pb <- sapply(newdata2$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
-newdata2 <- newdata2[, c(names(newdata2)[names(newdata2) != "sequence"], "sequence")]
+data_VerveurEau$longueur_sequence_pb <- sapply(data_VerveurEau$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurEau <- data_VerveurEau[, c(names(data_VerveurEau)[names(data_VerveurEau) != "sequence"], "sequence")]
 
 # Afficher le DataFrame mis à jour
-print(newdata2)
+print(data_VerveurEau)
+```
+
+
+
+```{r}
+data_VerveurSedi <- subset(filtered_cltax_VerveurSedi, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+chemin_du_dossier_VerveurSedi <- "/Users/amrozins/Documents/workflow/FASTA/VerveurSedi"
+
+lire_fasta_VerveurSedi <- function(qseqid, chemin_du_dossier_VerveurSedi) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurSedi <- list.files(chemin_du_dossier_VerveurSedi, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurSedi) > 0) {
+        seqs_VerveurSedi <- readDNAStringSet(fichiers_VerveurSedi[1], format = "fasta")
+        return(as.character(seqs_VerveurSedi))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurSedi$sequence <- sapply(data_VerveurSedi$qseqid, lire_fasta_VerveurSedi, chemin_du_dossier_VerveurSedi)
+data_VerveurSedi$longueur_sequence_pb <- sapply(data_VerveurSedi$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurSedi <- data_VerveurSedi[, c(names(data_VerveurSedi)[names(data_VerveurSedi) != "sequence"], "sequence")]
+print(data_VerveurSedi)
+```
+
+
+```{r}
+data_VerveurGD <- subset(filtered_cltax_VerveurGD, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+chemin_du_dossier_VerveurGD <- "/Users/amrozins/Documents/workflow/FASTA/VerveurGD"
+
+lire_fasta_VerveurGD <- function(qseqid, chemin_du_dossier_VerveurGD) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurGD <- list.files(chemin_du_dossier_VerveurGD, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurGD) > 0) {
+        seqs_VerveurGD <- readDNAStringSet(fichiers_VerveurGD[1], format = "fasta")
+        return(as.character(seqs_VerveurGD))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurGD$sequence <- sapply(data_VerveurGD$qseqid, lire_fasta_VerveurGD, chemin_du_dossier_VerveurGD)
+data_VerveurGD$longueur_sequence_pb <- sapply(data_VerveurGD$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurGD <- data_VerveurGD[, c(names(data_VerveurGD)[names(data_VerveurGD) != "sequence"], "sequence")]
+print(data_VerveurGD)
 ```
 
 ```{r}
-# Sauvegarder newdata au format CSV
-write.csv(newdata2, "/Users/alexa/OneDrive/Documents/BioInfo/StageM2/FASTA/newdata2.csv", row.names = FALSE)
-
+# Sauvegarder data_VerveurGD au format CSV
+write.csv(data_VerveurGD, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurGD.csv", row.names = FALSE)
 ```
+
+```{r}
+# Sauvegarder data_VerveurSedi au format CSV
+write.csv(data_VerveurSedi, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurSedi.csv", row.names = FALSE)
+```
+
+```{r}
+# Sauvegarder data_VerveurEau au format CSV
+write.csv(data_VerveurEau, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurEau.csv", row.names = FALSE)
+```
+
+```{r}
+#Combine les .csv
+
+# Chemin du fichier Excel de sortie
+output_excel_path <- "/Users/amrozins/Documents/workflow/Résultats/combined_dataVerveur.xlsx"
+
+# Écrire les données dans un fichier Excel avec plusieurs feuilles
+write.xlsx(list(data_VerveurGD = data_VerveurGD, 
+                data_VerveurSedi = data_VerveurSedi, 
+                data_VerveurEau = data_VerveurEau),
+           file = output_excel_path)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ```{r}
