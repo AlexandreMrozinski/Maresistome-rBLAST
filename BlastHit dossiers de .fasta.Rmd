@@ -1,0 +1,484 @@
+---
+title: "BlastHit dossiers de .fasta"
+output: html_document
+author: Alexandre Mrozinski (base : https://rsh249.github.io/bioinformatics/rBlast.html)
+date: "2024-01-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+#Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
+```{r, packages mais il doit en manquer, voir avec les library}
+install.packages(c("VennDiagram", "VennCounts"))
+```
+
+```{r library, include=FALSE}
+library(VennDiagram)
+library(DECIPHER)
+library(openxlsx)
+library(rmarkdown)
+library(knitr)
+library(phyloseq)
+library(dada2)
+library(DECIPHER)
+library(phangorn)
+library(ggplot2)
+library(gridExtra)
+library(shiny)
+library(miniUI)
+library(caret)
+library(pls)
+library(e1071)
+library(ggplot2)
+library(randomForest)
+library(dplyr)
+library(ggrepel)
+#library(nlme)
+library(devtools)
+library(reshape2)
+library(PMA)
+#library(structSSI)
+library(ade4)
+library(ggnetwork)
+library(intergraph)
+library(scales)
+library(genefilter)
+library(impute)
+library(phyloseqGraphTest)
+library(Biostrings)
+library(RSQLite)
+library(parallel)
+library(ape)
+library(taxonomizr)
+library('rBLAST')
+```
+
+```{r}
+#NE LANCER QUE UNE FOIS
+libdir='data'
+dir.create(libdir)
+setwd(libdir)
+getNamesAndNodes()
+getAccession2taxid(types=c('nucl_gb'))
+getAccession2taxid()
+system("gunzip *.gz")
+read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
+print(paste('taxonomizr database built and located at', getwd(), sep=' '))
+```
+
+```{r}
+#Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
+```
+
+```{r}
+#prepare for a BLAST query
+file_list_VerveurEau <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurSedi <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurSedi', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurGD <- list.files('/Users/amrozins/Documents/workflow/FASTA/VerveurGD', pattern = "\\.fa$", full.names = TRUE)
+
+dna_VerveurEau <- readDNAStringSet(file_list_VerveurEau, format='fasta')
+dna_VerveurSedi <- readDNAStringSet(file_list_VerveurSedi, format='fasta')
+dna_VerveurGD <- readDNAStringSet(file_list_VerveurGD, format='fasta')
+
+bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
+
+#Run BLAST query
+
+cl_VerveurEau <- predict(bl, dna_VerveurEau)
+cl_VerveurSedi <- predict(bl, dna_VerveurSedi)
+cl_VerveurGD <- predict(bl, dna_VerveurGD)
+
+cl_VerveurEau[1:5,]
+#to view first 5 hits
+summary(cl_VerveurEau)
+#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
+
+cl_VerveurSedi[1:5,]
+summary(cl_VerveurSedi)
+
+cl_VerveurGD[1:5,]
+summary(cl_VerveurGD)
+```
+
+```{r}
+accid_VerveurEau = as.character(cl_VerveurEau$sseqid)
+accid_VerveurSedi = as.character(cl_VerveurSedi$sseqid)
+accid_VerveurGD = as.character(cl_VerveurGD$sseqid)
+```
+
+```{r}
+taxaNodes<-read.nodes.sql("/Users/amrozins/Documents/workflow/data/nodes.dmp")
+taxaNames<-read.names.sql("/Users/amrozins/Documents/workflow/data/names.dmp")
+```
+
+```{r}
+#takes accession number and gets the taxonomic ID
+ids_VerveurEau<-accessionToTaxa(accid_VerveurEau, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+#taxlist displays the taxonomic names from each ID #
+taxlist_VerveurEau=getTaxonomy(ids_VerveurEau, taxaNodes, taxaNames)
+
+
+ids_VerveurSedi<-accessionToTaxa(accid_VerveurSedi, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurSedi=getTaxonomy(ids_VerveurSedi, taxaNodes, taxaNames)
+
+ids_VerveurGD<-accessionToTaxa(accid_VerveurGD, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurGD=getTaxonomy(ids_VerveurGD, taxaNodes, taxaNames)
+```
+
+```{r}
+#Résultats Totaux VerveurEau
+cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurEau)
+cltax_VerveurEau
+```
+
+```{r}
+#Résultats Totaux VerveurEau
+cltax_VerveurSedi=cbind(cl_VerveurSedi,taxlist_VerveurSedi) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurSedi)
+cltax_VerveurSedi
+```
+
+```{r}
+#Résultats Totaux VerveurEau
+cltax_VerveurGD=cbind(cl_VerveurGD,taxlist_VerveurGD) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurGD)
+cltax_VerveurGD
+```
+
+```{r}
+# Tri des résultats par qseqid et pident décroissants
+cltax_sorted_VerveurEau <- cltax_VerveurEau %>% arrange(qseqid, desc(pident))
+
+# Sélection des 5 premiers résultats pour chaque qseqid
+cltax5_VerveurEau <- cltax_sorted_VerveurEau %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurEau)
+```
+
+```{r}
+cltax_sorted_VerveurSedi <- cltax_VerveurSedi %>% arrange(qseqid, desc(pident))
+cltax5_VerveurSedi <- cltax_sorted_VerveurSedi %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurSedi)
+```
+
+```{r}
+cltax_sorted_VerveurGD <- cltax_VerveurGD %>% arrange(qseqid, desc(pident))
+cltax5_VerveurGD <- cltax_sorted_VerveurGD %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurGD)
+```
+
+```{r}
+#Ne prend pour chaque fasta que le résultat avec le max de % identity (pident)
+filtered_cltax_VerveurEau <- cltax_sorted_VerveurEau %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+
+filtered_cltax_VerveurEau
+```
+
+```{r}
+filtered_cltax_VerveurSedi <- cltax_sorted_VerveurSedi %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurSedi
+```
+
+```{r}
+filtered_cltax_VerveurGD <- cltax_sorted_VerveurGD %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurGD
+```
+
+
+#Pour sortir les TabRésultats
+
+```{r}
+#Pour sortir uniquement les résultats de taxo
+data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+print(data_VerveurEau)
+```
+
+```{r}
+#Résultats de taxo et ajoutes la longueur de la séquence et la séquence
+data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+# Emplacement des fichiers .fasta
+chemin_du_dossier_VerveurEau <- "/Users/amrozins/Documents/workflow/FASTA/VerveurEau"
+
+# Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
+lire_fasta_VerveurEau <- function(qseqid, chemin_du_dossier_VerveurEau) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurEau <- list.files(chemin_du_dossier_VerveurEau, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurEau) > 0) {
+        seqs_VerveurEau <- readDNAStringSet(fichiers_VerveurEau[1], format = "fasta")
+        return(as.character(seqs_VerveurEau))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+# Ajouter une colonne au DataFrame avec le contenu des fichiers FASTA
+data_VerveurEau$sequence <- sapply(data_VerveurEau$qseqid, lire_fasta_VerveurEau, chemin_du_dossier_VerveurEau)
+
+# Ajouter une colonne avec la longueur des séquences dans contenu_fasta
+data_VerveurEau$longueur_sequence_pb <- sapply(data_VerveurEau$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurEau <- data_VerveurEau[, c(names(data_VerveurEau)[names(data_VerveurEau) != "sequence"], "sequence")]
+
+# Afficher le DataFrame mis à jour
+print(data_VerveurEau)
+```
+
+
+
+```{r}
+data_VerveurSedi <- subset(filtered_cltax_VerveurSedi, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+chemin_du_dossier_VerveurSedi <- "/Users/amrozins/Documents/workflow/FASTA/VerveurSedi"
+
+lire_fasta_VerveurSedi <- function(qseqid, chemin_du_dossier_VerveurSedi) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurSedi <- list.files(chemin_du_dossier_VerveurSedi, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurSedi) > 0) {
+        seqs_VerveurSedi <- readDNAStringSet(fichiers_VerveurSedi[1], format = "fasta")
+        return(as.character(seqs_VerveurSedi))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurSedi$sequence <- sapply(data_VerveurSedi$qseqid, lire_fasta_VerveurSedi, chemin_du_dossier_VerveurSedi)
+data_VerveurSedi$longueur_sequence_pb <- sapply(data_VerveurSedi$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurSedi <- data_VerveurSedi[, c(names(data_VerveurSedi)[names(data_VerveurSedi) != "sequence"], "sequence")]
+print(data_VerveurSedi)
+```
+
+
+```{r}
+data_VerveurGD <- subset(filtered_cltax_VerveurGD, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+chemin_du_dossier_VerveurGD <- "/Users/amrozins/Documents/workflow/FASTA/VerveurGD"
+
+lire_fasta_VerveurGD <- function(qseqid, chemin_du_dossier_VerveurGD) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurGD <- list.files(chemin_du_dossier_VerveurGD, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurGD) > 0) {
+        seqs_VerveurGD <- readDNAStringSet(fichiers_VerveurGD[1], format = "fasta")
+        return(as.character(seqs_VerveurGD))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurGD$sequence <- sapply(data_VerveurGD$qseqid, lire_fasta_VerveurGD, chemin_du_dossier_VerveurGD)
+data_VerveurGD$longueur_sequence_pb <- sapply(data_VerveurGD$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurGD <- data_VerveurGD[, c(names(data_VerveurGD)[names(data_VerveurGD) != "sequence"], "sequence")]
+print(data_VerveurGD)
+```
+
+```{r}
+# Sauvegarder data_VerveurGD au format CSV
+write.csv(data_VerveurGD, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurGD.csv", row.names = FALSE)
+```
+
+```{r}
+# Sauvegarder data_VerveurSedi au format CSV
+write.csv(data_VerveurSedi, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurSedi.csv", row.names = FALSE)
+```
+
+```{r}
+# Sauvegarder data_VerveurEau au format CSV
+write.csv(data_VerveurEau, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurEau.csv", row.names = FALSE)
+```
+
+```{r}
+#Combine les .csv
+
+# Chemin du fichier Excel de sortie
+output_excel_path <- "/Users/amrozins/Documents/workflow/Résultats/combined_dataVerveur.xlsx"
+
+# Écrire les données dans un fichier Excel avec plusieurs feuilles
+write.xlsx(list(data_VerveurGD = data_VerveurGD, 
+                data_VerveurSedi = data_VerveurSedi, 
+                data_VerveurEau = data_VerveurEau),
+           file = output_excel_path)
+```
+
+
+#Représentations Graphique
+
+```{r, Représentation graphique des genres les plus retrouvés pour Verveur Eau / Sédiments / GD}
+# Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
+filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
+filtered_data_VerveurEau <- filtered_data_VerveurEau[!duplicated(filtered_data_VerveurEau$qseqid), ]
+
+filtered_data_VerveurSedi <- data_VerveurSedi[order(-data_VerveurSedi$pident), ]
+filtered_data_VerveurSedi <- filtered_data_VerveurSedi[!duplicated(filtered_data_VerveurSedi$qseqid), ]
+
+filtered_data_VerveurGD <- data_VerveurGD[order(-data_VerveurGD$pident), ]
+filtered_data_VerveurGD <- filtered_data_VerveurGD[!duplicated(filtered_data_VerveurGD$qseqid), ]
+
+# Combinez les données filtrées en une seule dataframe
+all_filtered_data <- rbind(filtered_data_VerveurEau, filtered_data_VerveurSedi, filtered_data_VerveurGD)
+
+# Tableau de comptage des genres
+genre_counts <- table(all_filtered_data$genus)
+
+# Sélectionnez les 10 genres les plus retrouvés
+top_genres <- head(sort(genre_counts, decreasing = TRUE), 10)
+
+# Créez le graphique à barres
+bar_plot <- ggplot(data.frame(Genus = names(top_genres), Count = as.numeric(top_genres)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés pour Verveur : Eau / Sédiments / GD", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_data)), hjust = 1, vjust = 0)
+
+print(bar_plot)
+```
+
+```{r, Représentation graphique des genres les plus retrouvés pour Verveur Eau / Sédiments / GD}
+# Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
+filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
+filtered_data_VerveurEau <- filtered_data_VerveurEau[!duplicated(filtered_data_VerveurEau$qseqid), ]
+
+filtered_data_VerveurSedi <- data_VerveurSedi[order(-data_VerveurSedi$pident), ]
+filtered_data_VerveurSedi <- filtered_data_VerveurSedi[!duplicated(filtered_data_VerveurSedi$qseqid), ]
+
+filtered_data_VerveurGD <- data_VerveurGD[order(-data_VerveurGD$pident), ]
+filtered_data_VerveurGD <- filtered_data_VerveurGD[!duplicated(filtered_data_VerveurGD$qseqid), ]
+
+# Combinez les données filtrées en une seule dataframe
+all_filtered_data <- rbind(filtered_data_VerveurEau, filtered_data_VerveurSedi, filtered_data_VerveurGD)
+
+# Tableau de comptage des genres
+genre_counts <- table(all_filtered_data$genus)
+
+# Sélectionnez les 10 genres les plus retrouvés
+top_genres <- head(sort(genre_counts, decreasing = TRUE), 10)
+
+# Créez le graphique à barres
+bar_plot <- ggplot(data.frame(Genus = names(top_genres), Count = as.numeric(top_genres)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés pour Verveur : Eau / Sédiments / GD", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_data)), hjust = 1, vjust = 0)
+
+print(bar_plot)
+```
+
+```{r, Uniquement pour Verveur Eau} 
+
+filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
+filtered_data_VerveurEau <- filtered_data_VerveurEau[!duplicated(filtered_data_VerveurEau$qseqid), ]
+
+genre_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
+
+top_genres_VerveurEau <- head(sort(genre_counts_VerveurEau, decreasing = TRUE), 10)
+
+bar_plot_VerveurEau <- ggplot(data.frame(Genus = names(top_genres_VerveurEau), Count = as.numeric(top_genres_VerveurEau)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés - VerveurEau", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurEau)), hjust = 1, vjust = 0)
+
+print(bar_plot_VerveurEau)
+```
+
+```{r, Uniquement pour Verveur Sédiments} 
+filtered_data_VerveurSedi <- data_VerveurSedi[order(-data_VerveurSedi$pident), ]
+filtered_data_VerveurSedi <- filtered_data_VerveurSedi[!duplicated(filtered_data_VerveurSedi$qseqid), ]
+
+genre_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
+
+top_genres_VerveurSedi <- head(sort(genre_counts_VerveurSedi, decreasing = TRUE), 10)
+
+bar_plot_VerveurSedi <- ggplot(data.frame(Genus = names(top_genres_VerveurSedi), Count = as.numeric(top_genres_VerveurSedi)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur Sédiments", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurSedi)), hjust = 1, vjust = 0)
+  
+print(bar_plot_VerveurSedi)
+```
+
+```{r, Uniquement pour Verveur GD} 
+filtered_data_VerveurGD <- data_VerveurGD[order(-data_VerveurGD$pident), ]
+filtered_data_VerveurGD <- filtered_data_VerveurGD[!duplicated(filtered_data_VerveurGD$qseqid), ]
+
+genre_counts_VerveurGD <- table(filtered_data_VerveurGD$genus)
+
+top_genres_VerveurGD <- head(sort(genre_counts_VerveurGD, decreasing = TRUE), 10)
+
+bar_plot_VerveurGD <- ggplot(data.frame(Genus = names(top_genres_VerveurGD), Count = as.numeric(top_genres_VerveurGD)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur GD", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurGD)), hjust = 1, vjust = 0)
+  
+print(bar_plot_VerveurGD)
+```
+
+```{r}
+# Extraire les genres uniques de chaque échantillon
+genres_VerveurEau <- unique(data_VerveurEau$genus)
+genres_VerveurSedi <- unique(data_VerveurSedi$genus)
+genres_VerveurGD <- unique(data_VerveurGD$genus)
+
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_list <- list(
+  VerveurEau = genres_VerveurEau,
+  VerveurSedi = genres_VerveurSedi,
+  VerveurGD = genres_VerveurGD
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plot <- ggvenn(sets_list, show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("blue", "yellow", "green", "red"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 5,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD
+  text_color = "black",
+  text_size = 3,  # Ajustez la taille de la police pour les genres
+  label_sep = "
+  ",
+  count_column = NULL,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plot$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plot +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
