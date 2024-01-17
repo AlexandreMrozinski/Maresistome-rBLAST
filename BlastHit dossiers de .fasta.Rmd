@@ -13,9 +13,13 @@ knitr::opts_chunk$set(echo = TRUE)
 #Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
 ```{r, packages mais il doit en manquer, voir avec les library}
 install.packages(c("VennDiagram", "VennCounts"))
+install.packages("readxl")
+
 ```
 
 ```{r library, include=FALSE}
+library(readxl)
+library(openxlsx)
 library(VennDiagram)
 library(DECIPHER)
 library(openxlsx)
@@ -316,7 +320,6 @@ write.xlsx(list(data_VerveurGD = data_VerveurGD,
                 data_VerveurEau = data_VerveurEau),
            file = output_excel_path)
 ```
-
 
 #Représentations Graphique
 
