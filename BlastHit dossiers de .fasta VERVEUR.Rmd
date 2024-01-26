@@ -78,7 +78,7 @@ Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+
 ```
 
 ```{r}
-#prepare for a BLAST query
+#BLAST query
 file_list_VerveurEau <- list.files('/Users/amrozins/Documents/workflow/FASTAtest/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
 file_list_VerveurSedi <- list.files('/Users/amrozins/Documents/workflow/FASTAtest/VerveurSedi', pattern = "\\.fa$", full.names = TRUE)
 file_list_VerveurGDND <- list.files('/Users/amrozins/Documents/workflow/FASTAtest/VerveurGDND', pattern = "\\.fa$", full.names = TRUE)
@@ -101,7 +101,6 @@ cl_VerveurGDDEP <- predict(bl, dna_VerveurGDDEP)
 cl_VerveurEau[1:5,]
 #to view first 5 hits
 summary(cl_VerveurEau)
-#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
 
 cl_VerveurSedi[1:5,]
 summary(cl_VerveurSedi)
