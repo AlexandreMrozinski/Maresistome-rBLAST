@@ -511,8 +511,8 @@ venn_plot <- ggvenn(sets_list, show_elements = TRUE,
   stroke_size = 1,
   stroke_linetype = "solid",
   set_name_color = "black",
-  set_name_size = 5,  # Ajustez la taille de la police ici MorlaixSedi MorlaixEau MorlaixGD..
-  text_size = 3,  # Ajustez la taille de la police pour les genres
+  set_name_size = 3,  # Ajustez la taille de la police ici MorlaixSedi MorlaixEau MorlaixGD..
+  text_size = 2,  # Ajustez la taille de la police pour les genres
   label_sep = "
   ",
   count_column = NULL,
@@ -528,4 +528,21 @@ venn_plot +
   theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
   theme_void()  # Retire le quadrillage de fond
 ```
+
+```{r, sauvegarde des figures}
+dir.create("FiguresMorlaix", showWarnings = FALSE)
+
+# Enregistrez le graphique global
+ggsave("FiguresMorlaix/bar_plot.png", bar_plot, width = 10, height = 6, units = "in")
+
+# Enregistrez les graphiques individuels
+ggsave("FiguresMorlaix/bar_plot_MorlaixEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
+ggsave("FiguresMorlaix/bar_plot_MorlaixSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
+ggsave("FiguresMorlaix/bar_plot_MorlaixGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
+ggsave("FiguresMorlaix/bar_plot_MorlaixGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
+
+# Enregistrez le diagramme de Venn
+ggsave("FiguresMorlaix/venn_plot.png", venn_plot, width = 6, height = 6, units = "in")
+```
+
 
