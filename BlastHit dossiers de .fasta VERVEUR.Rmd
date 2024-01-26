@@ -61,8 +61,7 @@ library(taxonomizr)
 library('rBLAST')
 ```
 
-```{r}
-#NE LANCER QUE UNE FOIS
+```{r, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
 libdir='data'
 dir.create(libdir)
 setwd(libdir)
@@ -74,8 +73,7 @@ read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
 print(paste('taxonomizr database built and located at', getwd(), sep=' '))
 ```
 
-```{r}
-#Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+
+```{r, Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+}
 Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
 ```
 
@@ -486,7 +484,7 @@ top_genres_VerveurGDDEP <- head(sort(genre_counts_VerveurGDDEP, decreasing = TRU
 bar_plot_VerveurGDDEP <- ggplot(data.frame(Genus = names(top_genres_VerveurGDDEP), Count = as.numeric(top_genres_VerveurGDDEP)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(title = "Top 10 Genres les plus retrouvés - Verveur GDND", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur GDDEP", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurGDDEP)), hjust = 1, vjust = 0)
   
