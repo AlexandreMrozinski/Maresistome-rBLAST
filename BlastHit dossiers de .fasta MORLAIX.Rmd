@@ -237,7 +237,7 @@ data_MorlaixEau <- subset(filtered_cltax_MorlaixEau,
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
 
 # Emplacement des fichiers .fasta
-chemin_du_dossier_MorlaixEau <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixEau"
+chemin_du_dossier_MorlaixEau <- "/Users/amrozins/Documents/workflow/FASTAtest/MorlaixEau"
 
 # Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
 lire_fasta_MorlaixEau <- function(qseqid, chemin_du_dossier_MorlaixEau) {
@@ -270,7 +270,7 @@ print(data_MorlaixEau)
 ```{r}
 data_MorlaixSedi <- subset(filtered_cltax_MorlaixSedi, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-chemin_du_dossier_MorlaixSedi <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixSedi"
+chemin_du_dossier_MorlaixSedi <- "/Users/amrozins/Documents/workflow/FASTAtest/MorlaixSedi"
 
 lire_fasta_MorlaixSedi <- function(qseqid, chemin_du_dossier_MorlaixSedi) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
@@ -295,14 +295,14 @@ print(data_MorlaixSedi)
 ```{r}
 data_MorlaixGDND <- subset(filtered_cltax_MorlaixGDND, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-chemin_du_dossier_MorlaixGDND <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixGDND"
+chemin_du_dossier_MorlaixGDND <- "/Users/amrozins/Documents/workflow/FASTAtest/MorlaixGDND"
 
 lire_fasta_MorlaixGDND <- function(qseqid, chemin_du_dossier_MorlaixGDND) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
     fichiers_MorlaixGDND <- list.files(chemin_du_dossier_MorlaixGDND, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
     
     if (length(fichiers_MorlaixGDND) > 0) {
-        seqs_MorlaixGDND <- readDNAStringSet(fichiers_MorlaixGD[1], format = "fasta")
+        seqs_MorlaixGDND <- readDNAStringSet(fichiers_MorlaixGDND[1], format = "fasta")
         return(as.character(seqs_MorlaixGDND))
     } else {
         cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
@@ -319,7 +319,7 @@ print(data_MorlaixGDND)
 ```{r}
 data_MorlaixGDDEP <- subset(filtered_cltax_MorlaixGDDEP, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-chemin_du_dossier_MorlaixGDDEP <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixGDDEP"
+chemin_du_dossier_MorlaixGDDEP <- "/Users/amrozins/Documents/workflow/FASTAtest/MorlaixGDDEP"
 
 lire_fasta_MorlaixGDDEP <- function(qseqid, chemin_du_dossier_MorlaixGDDEP) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")

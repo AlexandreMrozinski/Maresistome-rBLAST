@@ -242,7 +242,7 @@ data_VerveurEau <- subset(filtered_cltax_VerveurEau,
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
 
 # Emplacement des fichiers .fasta
-chemin_du_dossier_VerveurEau <- "/Users/amrozins/Documents/workflow/FASTA/VerveurEau"
+chemin_du_dossier_VerveurEau <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurEau"
 
 # Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
 lire_fasta_VerveurEau <- function(qseqid, chemin_du_dossier_VerveurEau) {
@@ -275,7 +275,7 @@ print(data_VerveurEau)
 ```{r}
 data_VerveurSedi <- subset(filtered_cltax_VerveurSedi, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-chemin_du_dossier_VerveurSedi <- "/Users/amrozins/Documents/workflow/FASTA/VerveurSedi"
+chemin_du_dossier_VerveurSedi <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurSedi"
 
 lire_fasta_VerveurSedi <- function(qseqid, chemin_du_dossier_VerveurSedi) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
@@ -300,14 +300,14 @@ print(data_VerveurSedi)
 ```{r}
 data_VerveurGDND <- subset(filtered_cltax_VerveurGDND, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-chemin_du_dossier_VerveurGDND <- "/Users/amrozins/Documents/workflow/FASTA/VerveurGDND"
+chemin_du_dossier_VerveurGDND <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurGDND"
 
 lire_fasta_VerveurGDND <- function(qseqid, chemin_du_dossier_VerveurGDND) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
     fichiers_VerveurGDND <- list.files(chemin_du_dossier_VerveurGDND, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
     
     if (length(fichiers_VerveurGDND) > 0) {
-        seqs_VerveurGDND <- readDNAStringSet(fichiers_VerveurGD[1], format = "fasta")
+        seqs_VerveurGDND <- readDNAStringSet(fichiers_VerveurGDND[1], format = "fasta")
         return(as.character(seqs_VerveurGDND))
     } else {
         cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
@@ -324,7 +324,7 @@ print(data_VerveurGDND)
 ```{r}
 data_VerveurGDDEP <- subset(filtered_cltax_VerveurGDDEP, 
                   select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-chemin_du_dossier_VerveurGDDEP <- "/Users/amrozins/Documents/workflow/FASTA/VerveurGDDEP"
+chemin_du_dossier_VerveurGDDEP <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurGDDEP"
 
 lire_fasta_VerveurGDDEP <- function(qseqid, chemin_du_dossier_VerveurGDDEP) {
     pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
