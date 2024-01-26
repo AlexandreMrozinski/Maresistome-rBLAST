@@ -1,6 +1,6 @@
 ---
 title: "BlastHit dossiers de .fasta"
-output: html_document
+output: pdf_document
 author: Alexandre Mrozinski (base : https://rsh249.github.io/bioinformatics/rBlast.html)
 date: "2024-01-14"
 ---
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 #Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
 
-```{r, packages mais il doit en manquer, voir avec les library}
+```{r, eval=FALSE, packages mais il doit en manquer, voir avec les library}
 install.packages(c("VennDiagram", "VennCounts"))
 install.packages("readxl")
 
@@ -61,7 +61,7 @@ library(taxonomizr)
 library('rBLAST')
 ```
 
-```{r, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
+```{r, eval=FALSE, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
 libdir='data'
 dir.create(libdir)
 setwd(libdir)

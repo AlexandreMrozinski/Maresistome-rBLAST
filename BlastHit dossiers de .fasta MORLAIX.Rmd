@@ -1,0 +1,448 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+#Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
+
+```{r, packages mais il doit en manquer, voir avec les library}
+install.packages(c("VennDiagram", "VennCounts"))
+install.packages("readxl")
+
+```
+
+```{r library, include=FALSE}
+library(readxl)
+library(openxlsx)
+library(VennDiagram)
+library(DECIPHER)
+library(openxlsx)
+library(rmarkdown)
+library(knitr)
+library(phyloseq)
+library(dada2)
+library(DECIPHER)
+library(phangorn)
+library(ggplot2)
+library(gridExtra)
+library(shiny)
+library(miniUI)
+library(caret)
+library(pls)
+library(e1071)
+library(ggplot2)
+library(randomForest)
+library(dplyr)
+library(ggrepel)
+#library(nlme)
+library(devtools)
+library(reshape2)
+library(PMA)
+#library(structSSI)
+library(ade4)
+library(ggnetwork)
+library(intergraph)
+library(scales)
+library(genefilter)
+library(impute)
+library(phyloseqGraphTest)
+library(Biostrings)
+library(RSQLite)
+library(parallel)
+library(ape)
+library(taxonomizr)
+library('rBLAST')
+```
+
+```{r, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
+libdir='data'
+dir.create(libdir)
+setwd(libdir)
+getNamesAndNodes()
+getAccession2taxid(types=c('nucl_gb'))
+getAccession2taxid()
+system("gunzip *.gz")
+read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
+print(paste('taxonomizr database built and located at', getwd(), sep=' '))
+```
+
+```{r, Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+}
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
+```
+
+```{r}
+#prepare for a BLAST query
+file_list_MorlaixEau <- list.files('/Users/amrozins/Documents/workflow/FASTA/MorlaixEau', pattern = "\\.fa$", full.names = TRUE)
+file_list_MorlaixSedi <- list.files('/Users/amrozins/Documents/workflow/FASTA/MorlaixSedi', pattern = "\\.fa$", full.names = TRUE)
+file_list_MorlaixGD <- list.files('/Users/amrozins/Documents/workflow/FASTA/MorlaixGD', pattern = "\\.fa$", full.names = TRUE)
+
+dna_MorlaixEau <- readDNAStringSet(file_list_MorlaixEau, format='fasta')
+dna_MorlaixSedi <- readDNAStringSet(file_list_MorlaixSedi, format='fasta')
+dna_MorlaixGD <- readDNAStringSet(file_list_MorlaixGD, format='fasta')
+
+bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
+
+#Run BLAST query
+
+cl_MorlaixEau <- predict(bl, dna_MorlaixEau)
+cl_MorlaixSedi <- predict(bl, dna_MorlaixSedi)
+cl_MorlaixGD <- predict(bl, dna_MorlaixGD)
+
+cl_MorlaixEau[1:5,]
+#to view first 5 hits
+summary(cl_MorlaixEau)
+#shows the top QueryID hits and other summary statistics including percent identity, alignment length and mismatches. 
+
+cl_MorlaixSedi[1:5,]
+summary(cl_MorlaixSedi)
+
+cl_MorlaixGD[1:5,]
+summary(cl_MorlaixGD)
+```
+
+```{r}
+accid_MorlaixEau = as.character(cl_MorlaixEau$sseqid)
+accid_MorlaixSedi = as.character(cl_MorlaixSedi$sseqid)
+accid_MorlaixGD = as.character(cl_MorlaixGD$sseqid)
+```
+
+```{r}
+taxaNodes<-read.nodes.sql("/Users/amrozins/Documents/workflow/data/nodes.dmp")
+taxaNames<-read.names.sql("/Users/amrozins/Documents/workflow/data/names.dmp")
+```
+
+```{r}
+#takes accession number and gets the taxonomic ID
+ids_MorlaixEau<-accessionToTaxa(accid_MorlaixEau, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+#taxlist displays the taxonomic names from each ID #
+taxlist_MorlaixEau=getTaxonomy(ids_MorlaixEau, taxaNodes, taxaNames)
+
+
+ids_MorlaixSedi<-accessionToTaxa(accid_MorlaixSedi, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_MorlaixSedi=getTaxonomy(ids_MorlaixSedi, taxaNodes, taxaNames)
+
+ids_MorlaixGD<-accessionToTaxa(accid_MorlaixGD, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_MorlaixGD=getTaxonomy(ids_MorlaixGD, taxaNodes, taxaNames)
+```
+
+```{r}
+#Résultats Totaux MorlaixEau
+cltax_MorlaixEau=cbind(cl_MorlaixEau,taxlist_MorlaixEau) #bind BLAST hits and taxonomy table
+colnames(cltax_MorlaixEau)
+cltax_MorlaixEau
+```
+
+```{r}
+#Résultats Totaux MorlaixEau
+cltax_MorlaixSedi=cbind(cl_MorlaixSedi,taxlist_MorlaixSedi)
+cltax_MorlaixSedi
+```
+
+```{r}
+#Résultats Totaux MorlaixEau
+cltax_MorlaixGD=cbind(cl_MorlaixGD,taxlist_MorlaixGD)
+colnames(cltax_MorlaixGD)
+cltax_MorlaixGD
+```
+
+```{r}
+# Tri des résultats par qseqid et pident décroissants
+cltax_sorted_MorlaixEau <- cltax_MorlaixEau %>% arrange(qseqid, desc(pident))
+
+# Sélection des 5 premiers résultats pour chaque qseqid
+cltax5_MorlaixEau <- cltax_sorted_MorlaixEau %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixEau)
+```
+
+```{r}
+cltax_sorted_MorlaixSedi <- cltax_MorlaixSedi %>% arrange(qseqid, desc(pident))
+cltax5_MorlaixSedi <- cltax_sorted_MorlaixSedi %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixSedi)
+```
+
+```{r}
+cltax_sorted_MorlaixGD <- cltax_MorlaixGD %>% arrange(qseqid, desc(pident))
+cltax5_MorlaixGD <- cltax_sorted_MorlaixGD %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixGD)
+```
+
+```{r}
+#Ne prend pour chaque fasta que le résultat avec le max de % identity (pident)
+filtered_cltax_MorlaixEau <- cltax_sorted_MorlaixEau %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+
+filtered_cltax_MorlaixEau
+```
+
+```{r}
+filtered_cltax_MorlaixSedi <- cltax_sorted_MorlaixSedi %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_MorlaixSedi
+```
+
+```{r}
+filtered_cltax_MorlaixGD <- cltax_sorted_MorlaixGD %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_MorlaixGD
+```
+
+
+#Pour sortir les TabRésultats
+
+```{r}
+#Pour sortir uniquement les résultats de taxo
+data_MorlaixEau <- subset(filtered_cltax_MorlaixEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+print(data_MorlaixEau)
+```
+
+```{r}
+#Résultats de taxo et ajoutes la longueur de la séquence et la séquence
+data_MorlaixEau <- subset(filtered_cltax_MorlaixEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+
+# Emplacement des fichiers .fasta
+chemin_du_dossier_MorlaixEau <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixEau"
+
+# Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
+lire_fasta_MorlaixEau <- function(qseqid, chemin_du_dossier_MorlaixEau) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixEau <- list.files(chemin_du_dossier_MorlaixEau, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixEau) > 0) {
+        seqs_MorlaixEau <- readDNAStringSet(fichiers_MorlaixEau[1], format = "fasta")
+        return(as.character(seqs_MorlaixEau))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+# Ajouter une colonne au DataFrame avec le contenu des fichiers FASTA
+data_MorlaixEau$sequence <- sapply(data_MorlaixEau$qseqid, lire_fasta_MorlaixEau, chemin_du_dossier_MorlaixEau)
+
+# Ajouter une colonne avec la longueur des séquences dans contenu_fasta
+data_MorlaixEau$longueur_sequence_pb <- sapply(data_MorlaixEau$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixEau <- data_MorlaixEau[, c(names(data_MorlaixEau)[names(data_MorlaixEau) != "sequence"], "sequence")]
+
+# Afficher le DataFrame mis à jour
+print(data_MorlaixEau)
+```
+
+
+
+```{r}
+data_MorlaixSedi <- subset(filtered_cltax_MorlaixSedi, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+chemin_du_dossier_MorlaixSedi <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixSedi"
+
+lire_fasta_MorlaixSedi <- function(qseqid, chemin_du_dossier_MorlaixSedi) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixSedi <- list.files(chemin_du_dossier_MorlaixSedi, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixSedi) > 0) {
+        seqs_MorlaixSedi <- readDNAStringSet(fichiers_MorlaixSedi[1], format = "fasta")
+        return(as.character(seqs_MorlaixSedi))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_MorlaixSedi$sequence <- sapply(data_MorlaixSedi$qseqid, lire_fasta_MorlaixSedi, chemin_du_dossier_MorlaixSedi)
+data_MorlaixSedi$longueur_sequence_pb <- sapply(data_MorlaixSedi$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixSedi <- data_MorlaixSedi[, c(names(data_MorlaixSedi)[names(data_MorlaixSedi) != "sequence"], "sequence")]
+print(data_MorlaixSedi)
+```
+
+
+```{r}
+data_MorlaixGD <- subset(filtered_cltax_MorlaixGD, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+chemin_du_dossier_MorlaixGD <- "/Users/amrozins/Documents/workflow/FASTA/MorlaixGD"
+
+lire_fasta_MorlaixGD <- function(qseqid, chemin_du_dossier_MorlaixGD) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixGD <- list.files(chemin_du_dossier_MorlaixGD, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixGD) > 0) {
+        seqs_MorlaixGD <- readDNAStringSet(fichiers_MorlaixGD[1], format = "fasta")
+        return(as.character(seqs_MorlaixGD))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_MorlaixGD$sequence <- sapply(data_MorlaixGD$qseqid, lire_fasta_MorlaixGD, chemin_du_dossier_MorlaixGD)
+data_MorlaixGD$longueur_sequence_pb <- sapply(data_MorlaixGD$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixGD <- data_MorlaixGD[, c(names(data_MorlaixGD)[names(data_MorlaixGD) != "sequence"], "sequence")]
+print(data_MorlaixGD)
+```
+
+```{r}
+# Sauvegarder data_MorlaixGD au format CSV
+write.csv(data_MorlaixGD, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixGD.csv", row.names = FALSE)
+```
+
+```{r}
+# Sauvegarder data_MorlaixSedi au format CSV
+write.csv(data_MorlaixSedi, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixSedi.csv", row.names = FALSE)
+```
+
+```{r}
+# Sauvegarder data_MorlaixEau au format CSV
+write.csv(data_MorlaixEau, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixEau.csv", row.names = FALSE)
+```
+
+```{r}
+#Combine les .csv
+
+# Chemin du fichier Excel de sortie
+output_excel_path <- "/Users/amrozins/Documents/workflow/Résultats/combined_dataMorlaix.xlsx"
+
+# Écrire les données dans un fichier Excel avec plusieurs feuilles
+write.xlsx(list(data_MorlaixGD = data_MorlaixGD, 
+                data_MorlaixSedi = data_MorlaixSedi, 
+                data_MorlaixEau = data_MorlaixEau),
+           file = output_excel_path)
+```
+
+#Représentations Graphique
+
+```{r, Représentation graphique des genres les plus retrouvés pour Morlaix Eau / Sédiments / GD}
+# Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
+filtered_data_MorlaixEau <- data_MorlaixEau[order(-data_MorlaixEau$pident), ]
+filtered_data_MorlaixEau <- filtered_data_MorlaixEau[!duplicated(filtered_data_MorlaixEau$qseqid), ]
+
+filtered_data_MorlaixSedi <- data_MorlaixSedi[order(-data_MorlaixSedi$pident), ]
+filtered_data_MorlaixSedi <- filtered_data_MorlaixSedi[!duplicated(filtered_data_MorlaixSedi$qseqid), ]
+
+filtered_data_MorlaixGD <- data_MorlaixGD[order(-data_MorlaixGD$pident), ]
+filtered_data_MorlaixGD <- filtered_data_MorlaixGD[!duplicated(filtered_data_MorlaixGD$qseqid), ]
+
+# Combinez les données filtrées en une seule dataframe
+all_filtered_data <- rbind(filtered_data_MorlaixEau, filtered_data_MorlaixSedi, filtered_data_MorlaixGD)
+
+# Tableau de comptage des genres
+genre_counts <- table(all_filtered_data$genus)
+
+# Sélectionnez les 10 genres les plus retrouvés
+top_genres <- head(sort(genre_counts, decreasing = TRUE), 10)
+
+# Créez le graphique à barres
+bar_plot <- ggplot(data.frame(Genus = names(top_genres), Count = as.numeric(top_genres)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés pour Morlaix : Eau / Sédiments / GD", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_data)), hjust = 1, vjust = 0)
+
+print(bar_plot)
+```
+
+
+```{r, Uniquement pour Morlaix Eau} 
+
+filtered_data_MorlaixEau <- data_MorlaixEau[order(-data_MorlaixEau$pident), ]
+filtered_data_MorlaixEau <- filtered_data_MorlaixEau[!duplicated(filtered_data_MorlaixEau$qseqid), ]
+
+genre_counts_MorlaixEau <- table(filtered_data_MorlaixEau$genus)
+
+top_genres_MorlaixEau <- head(sort(genre_counts_MorlaixEau, decreasing = TRUE), 10)
+
+bar_plot_MorlaixEau <- ggplot(data.frame(Genus = names(top_genres_MorlaixEau), Count = as.numeric(top_genres_MorlaixEau)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés - MorlaixEau", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixEau)), hjust = 1, vjust = 0)
+
+print(bar_plot_MorlaixEau)
+```
+
+```{r, Uniquement pour Morlaix Sédiments} 
+filtered_data_MorlaixSedi <- data_MorlaixSedi[order(-data_MorlaixSedi$pident), ]
+filtered_data_MorlaixSedi <- filtered_data_MorlaixSedi[!duplicated(filtered_data_MorlaixSedi$qseqid), ]
+
+genre_counts_MorlaixSedi <- table(filtered_data_MorlaixSedi$genus)
+
+top_genres_MorlaixSedi <- head(sort(genre_counts_MorlaixSedi, decreasing = TRUE), 10)
+
+bar_plot_MorlaixSedi <- ggplot(data.frame(Genus = names(top_genres_MorlaixSedi), Count = as.numeric(top_genres_MorlaixSedi)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés - Morlaix Sédiments", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixSedi)), hjust = 1, vjust = 0)
+  
+print(bar_plot_MorlaixSedi)
+```
+
+```{r, Uniquement pour Morlaix GD} 
+filtered_data_MorlaixGD <- data_MorlaixGD[order(-data_MorlaixGD$pident), ]
+filtered_data_MorlaixGD <- filtered_data_MorlaixGD[!duplicated(filtered_data_MorlaixGD$qseqid), ]
+
+genre_counts_MorlaixGD <- table(filtered_data_MorlaixGD$genus)
+
+top_genres_MorlaixGD <- head(sort(genre_counts_MorlaixGD, decreasing = TRUE), 10)
+
+bar_plot_MorlaixGD <- ggplot(data.frame(Genus = names(top_genres_MorlaixGD), Count = as.numeric(top_genres_MorlaixGD)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés - Morlaix GD", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixGD)), hjust = 1, vjust = 0)
+  
+print(bar_plot_MorlaixGD)
+```
+
+```{r}
+# Extraire les genres uniques de chaque échantillon
+genres_MorlaixEau <- unique(data_MorlaixEau$genus)
+genres_MorlaixSedi <- unique(data_MorlaixSedi$genus)
+genres_MorlaixGD <- unique(data_MorlaixGD$genus)
+
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_list <- list(
+  MorlaixEau = genres_MorlaixEau,
+  MorlaixSedi = genres_MorlaixSedi,
+  MorlaixGD = genres_MorlaixGD
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plot <- ggvenn(sets_list, show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("skyblue", "yellow", "green", "red"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 5,  # Ajustez la taille de la police ici MorlaixSedi MorlaixEau MorlaixGD
+  text_color = "black",
+  text_size = 3,  # Ajustez la taille de la police pour les genres
+  label_sep = "
+  ",
+  count_column = NULL,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plot$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plot +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
