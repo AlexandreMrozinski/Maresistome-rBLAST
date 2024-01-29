@@ -140,35 +140,31 @@ ids_VerveurGDDEP<-accessionToTaxa(accid_VerveurGDDEP, '/Users/amrozins/Documents
 taxlist_VerveurGDDEP=getTaxonomy(ids_VerveurGDDEP, taxaNodes, taxaNames)
 ```
 
-```{r}
-#Résultats Totaux VerveurEau
+```{r, Résultats Totaux VerveurEau}
 cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
 colnames(cltax_VerveurEau)
 cltax_VerveurEau
 ```
 
-```{r}
-#Résultats Totaux VerveurSedi
+```{r, Résultats Totaux VerveurSedi}
 cltax_VerveurSedi=cbind(cl_VerveurSedi,taxlist_VerveurSedi) #bind BLAST hits and taxonomy table
 colnames(cltax_VerveurSedi)
 cltax_VerveurSedi
 ```
 
-```{r}
-#Résultats Totaux VerveurGDND
+```{r, Résultats Totaux VerveurGDND}
 cltax_VerveurGDND=cbind(cl_VerveurGDND,taxlist_VerveurGDND) 
 colnames(cltax_VerveurGDND)
 cltax_VerveurGDND
 ```
 
-```{r}
-#Résultats Totaux VerveurGDDEP
+```{r, Résultats Totaux VerveurGDDEP}
 cltax_VerveurGDDEP=cbind(cl_VerveurGDDEP,taxlist_VerveurGDDEP)
 colnames(cltax_VerveurGDDEP)
 cltax_VerveurGDDEP
 ```
 
-```{r}
+```{r, top 5}
 # Tri des résultats par qseqid et pident décroissants
 cltax_sorted_VerveurEau <- cltax_VerveurEau %>% arrange(qseqid, desc(pident))
 
@@ -177,25 +173,25 @@ cltax5_VerveurEau <- cltax_sorted_VerveurEau %>% group_by(qseqid) %>% slice_head
 print(cltax5_VerveurEau)
 ```
 
-```{r}
+```{r, top 5}
 cltax_sorted_VerveurSedi <- cltax_VerveurSedi %>% arrange(qseqid, desc(pident))
 cltax5_VerveurSedi <- cltax_sorted_VerveurSedi %>% group_by(qseqid) %>% slice_head(n = 5)
 print(cltax5_VerveurSedi)
 ```
 
-```{r}
+```{r, top 5}
 cltax_sorted_VerveurGDND <- cltax_VerveurGDND %>% arrange(qseqid, desc(pident))
 cltax5_VerveurGDND <- cltax_sorted_VerveurGDND %>% group_by(qseqid) %>% slice_head(n = 5)
 print(cltax5_VerveurGDND)
 ```
 
-```{r}
+```{r, top 5}
 cltax_sorted_VerveurGDDEP <- cltax_VerveurGDDEP %>% arrange(qseqid, desc(pident))
 cltax5_VerveurGDDEP <- cltax_sorted_VerveurGDDEP %>% group_by(qseqid) %>% slice_head(n = 5)
 print(cltax5_VerveurGDDEP)
 ```
 
-```{r}
+```{r, max % identité}
 #Ne prend pour chaque fasta que le résultat avec le max de % identity (pident)
 filtered_cltax_VerveurEau <- cltax_sorted_VerveurEau %>%
   group_by(qseqid) %>%
@@ -204,21 +200,21 @@ filtered_cltax_VerveurEau <- cltax_sorted_VerveurEau %>%
 filtered_cltax_VerveurEau
 ```
 
-```{r}
+```{r, max % identité}
 filtered_cltax_VerveurSedi <- cltax_sorted_VerveurSedi %>%
   group_by(qseqid) %>%
   filter(pident == max(pident))
 filtered_cltax_VerveurSedi
 ```
 
-```{r}
+```{r, max % identité}
 filtered_cltax_VerveurGDND <- cltax_sorted_VerveurGDND %>%
   group_by(qseqid) %>%
   filter(pident == max(pident))
 filtered_cltax_VerveurGDND
 ```
 
-```{r}
+```{r, max % identité}
 filtered_cltax_VerveurGDDEP <- cltax_sorted_VerveurGDDEP %>%
   group_by(qseqid) %>%
   filter(pident == max(pident))
@@ -228,17 +224,9 @@ filtered_cltax_VerveurGDDEP
 #Pour sortir les TabRésultats
 
 ```{r}
-#Pour sortir uniquement les résultats de taxo
-data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
-                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
-
-print(data_VerveurEau)
-```
-
-```{r}
 #Résultats de taxo et ajoutes la longueur de la séquence et la séquence
 data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
-                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
 
 # Emplacement des fichiers .fasta
 chemin_du_dossier_VerveurEau <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurEau"
@@ -273,7 +261,7 @@ print(data_VerveurEau)
 
 ```{r}
 data_VerveurSedi <- subset(filtered_cltax_VerveurSedi, 
-                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
 chemin_du_dossier_VerveurSedi <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurSedi"
 
 lire_fasta_VerveurSedi <- function(qseqid, chemin_du_dossier_VerveurSedi) {
@@ -298,7 +286,7 @@ print(data_VerveurSedi)
 
 ```{r}
 data_VerveurGDND <- subset(filtered_cltax_VerveurGDND, 
-                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
 chemin_du_dossier_VerveurGDND <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurGDND"
 
 lire_fasta_VerveurGDND <- function(qseqid, chemin_du_dossier_VerveurGDND) {
@@ -322,7 +310,7 @@ print(data_VerveurGDND)
 
 ```{r}
 data_VerveurGDDEP <- subset(filtered_cltax_VerveurGDDEP, 
-                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident))
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
 chemin_du_dossier_VerveurGDDEP <- "/Users/amrozins/Documents/workflow/FASTAtest/VerveurGDDEP"
 
 lire_fasta_VerveurGDDEP <- function(qseqid, chemin_du_dossier_VerveurGDDEP) {
@@ -344,29 +332,23 @@ data_VerveurGDDEP <- data_VerveurGDDEP[, c(names(data_VerveurGDDEP)[names(data_V
 print(data_VerveurGDDEP)
 ```
 
-```{r}
-# Sauvegarder data_VerveurGDND au format CSV
+```{r, Sauvegarder data_VerveurGDND au format CSV}
 write.csv(data_VerveurGDND, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurGDND.csv", row.names = FALSE)
 ```
 
-```{r}
-# Sauvegarder data_VerveurGDDEP au format CSV
+```{r, Sauvegarder data_VerveurGDDEP au format CSV}
 write.csv(data_VerveurGDDEP, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurGDDEP.csv", row.names = FALSE)
 ```
 
-```{r}
-# Sauvegarder data_VerveurSedi au format CSV
+```{r, Sauvegarder data_VerveurSedi au format CSV}
 write.csv(data_VerveurSedi, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurSedi.csv", row.names = FALSE)
 ```
 
-```{r}
-# Sauvegarder data_VerveurEau au format CSV
+```{r, Sauvegarder data_VerveurEau au format CSV}
 write.csv(data_VerveurEau, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurEau.csv", row.names = FALSE)
 ```
 
-```{r}
-#Combine les .csv
-
+```{r, Combine les .csv}
 # Chemin du fichier Excel de sortie
 output_excel_path <- "/Users/amrozins/Documents/workflow/Résultats/combined_dataVerveur.xlsx"
 
