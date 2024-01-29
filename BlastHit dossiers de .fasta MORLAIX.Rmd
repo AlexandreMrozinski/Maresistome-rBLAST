@@ -87,11 +87,13 @@ dna_MorlaixGDDEP <- readDNAStringSet(file_list_MorlaixGDDEP, format='fasta')
 bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
 
 #Run BLAST query
-
-cl_MorlaixEau <- predict(bl, dna_MorlaixEau)
-cl_MorlaixSedi <- predict(bl, dna_MorlaixSedi)
-cl_MorlaixGDND <- predict(bl, dna_MorlaixGDND)
-cl_MorlaixGDDEP <- predict(bl, dna_MorlaixGDDEP)
+fmt <- "qseqid saccver pident length evalue qcovs"
+#When not provided, the default value is: 'qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+#voir rBLAST help
+cl_MorlaixEau <- predict(bl, dna_MorlaixEau, custom_format = fmt)
+cl_MorlaixSedi <- predict(bl, dna_MorlaixSedi, custom_format = fmt)
+cl_MorlaixGDND <- predict(bl, dna_MorlaixGDND, custom_format = fmt)
+cl_MorlaixGDDEP <- predict(bl, dna_MorlaixGDDEP, custom_format = fmt)
 
 cl_MorlaixEau[1:5,]
 #to view first 5 hits
@@ -108,10 +110,10 @@ summary(cl_MorlaixGDDEP)
 ```
 
 ```{r}
-accid_MorlaixEau = as.character(cl_MorlaixEau$sseqid)
-accid_MorlaixSedi = as.character(cl_MorlaixSedi$sseqid)
-accid_MorlaixGDND = as.character(cl_MorlaixGDND$sseqid)
-accid_MorlaixGDDEP = as.character(cl_MorlaixGDDEP$sseqid)
+accid_MorlaixEau = as.character(cl_MorlaixEau$saccver)
+accid_MorlaixSedi = as.character(cl_MorlaixSedi$saccver)
+accid_MorlaixGDND = as.character(cl_MorlaixGDND$saccver)
+accid_MorlaixGDDEP = as.character(cl_MorlaixGDDEP$saccver)
 ```
 
 ```{r}

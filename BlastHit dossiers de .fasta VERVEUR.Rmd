@@ -20,6 +20,7 @@ install.packages("readxl")
 
 ```{r library, include=FALSE}
 library(readxl)
+library(ggvenn)
 library(openxlsx)
 library(VennDiagram)
 library(DECIPHER)
@@ -92,31 +93,29 @@ dna_VerveurGDDEP <- readDNAStringSet(file_list_VerveurGDDEP, format='fasta')
 bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
 
 #Run BLAST query
-
-cl_VerveurEau <- predict(bl, dna_VerveurEau)
-cl_VerveurSedi <- predict(bl, dna_VerveurSedi)
-cl_VerveurGDND <- predict(bl, dna_VerveurGDND)
-cl_VerveurGDDEP <- predict(bl, dna_VerveurGDDEP)
+fmt <- "qseqid saccver pident length evalue qcovs"
+#When not provided, the default value is: 'qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+#voir rBLAST help
+cl_VerveurEau <- predict(bl, dna_VerveurEau, custom_format = fmt)
+cl_VerveurSedi <- predict(bl, dna_VerveurSedi, custom_format = fmt)
+cl_VerveurGDND <- predict(bl, dna_VerveurGDND, custom_format = fmt)
+cl_VerveurGDDEP <- predict(bl, dna_VerveurGDDEP, custom_format = fmt)
 
 cl_VerveurEau[1:5,]
-#to view first 5 hits
 summary(cl_VerveurEau)
-
 cl_VerveurSedi[1:5,]
 summary(cl_VerveurSedi)
-
 cl_VerveurGDND[1:5,]
 summary(cl_VerveurGDND)
-
 cl_VerveurGDDEP[1:5,]
 summary(cl_VerveurGDDEP)
 ```
 
 ```{r}
-accid_VerveurEau = as.character(cl_VerveurEau$sseqid)
-accid_VerveurSedi = as.character(cl_VerveurSedi$sseqid)
-accid_VerveurGDND = as.character(cl_VerveurGDND$sseqid)
-accid_VerveurGDDEP = as.character(cl_VerveurGDDEP$sseqid)
+accid_VerveurEau = as.character(cl_VerveurEau$saccver)
+accid_VerveurSedi = as.character(cl_VerveurSedi$saccver)
+accid_VerveurGDND = as.character(cl_VerveurGDND$saccver)
+accid_VerveurGDDEP = as.character(cl_VerveurGDDEP$saccver)
 ```
 
 ```{r}
