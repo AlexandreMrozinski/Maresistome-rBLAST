@@ -1,0 +1,74 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+# Spécifier le chemin vers le fichier Excel
+chemin_fichier <- "/Users/amrozins/Documents/workflow/offret.xlsx"
+
+# Charger le fichier Excel
+donnees <- read_excel(chemin_fichier)
+```
+
+```{r}
+# Afficher les premières lignes pour vérifier la lecture
+head(donnees)
+
+# Créer un tableau des genres les plus présents
+tableau_genres <- donnees %>%
+  group_by(genus) %>%
+  summarise(Nombre = n()) %>%
+  arrange(desc(Nombre))
+
+# Afficher le tableau des genres les plus présents
+print(tableau_genres)
+```
+
+```{r}
+library(ggplot2)
+
+top40_genres <- head(tableau_genres, 40)
+
+graphique_genres_barres_horizontal <- ggplot(top40_genres, aes(x = reorder(genus, -Nombre), y = Nombre)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 20 des genres les plus présents", x = "Genre", y = "Nombre") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Afficher le graphique
+print(graphique_genres_barres_horizontal)
+
+```
+
+```{r}
+genres_specifiques <- c("Pseudoalteromonas", "Shewanella", "Rahnella", 
+                        "Winogradskyella", "Vibrio", "Pseudomonas", 
+                        "Bacillus", "Flavobacteria", "Cellulophaga", 
+                        "Aeromonas")
+
+# Filtrer les données pour inclure uniquement les genres spécifiques
+genres_specifiques_tableau <- tableau_genres %>%
+  filter(genus %in% genres_specifiques)
+
+# Afficher le tableau des genres spécifiques
+print(genres_specifiques_tableau)
+```
+
+```{r}
+library(ggplot2)
+
+# Créer un graphique à barres horizontal des genres spécifiques
+graphique_genres_specifiques <- ggplot(genres_specifiques_tableau, aes(x = reorder(genus, -Nombre), y = Nombre)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Genres spécifiques les plus présents", x = "Genre", y = "Nombre") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Afficher le graphique
+print(graphique_genres_specifiques)
+```
+
