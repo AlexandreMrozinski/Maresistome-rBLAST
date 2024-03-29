@@ -998,3 +998,19 @@ ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDND.png", bar_plot_MorlaixGDND, 
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
 ggsave("FiguresMorlaix/venn_plotVerveur.png", venn_plot, width = 6, height = 6, units = "in")
 ```
+
+```{bash}
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\combined_dataMorlaix.xlsx"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\combined_dataVerveur.xlsx"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixEau.csv"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixGDDEP.csv"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixGDND.csv"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixSedi.csv"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_VerveurEau.csv"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_VerveurGDDEP.csv"
+git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_VerveurGDND.csv"
+
+
+
+```
+
