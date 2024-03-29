@@ -582,6 +582,7 @@ write.xlsx(list(data_MorlaixGDND = data_MorlaixGDND,
                 data_MorlaixSedi = data_MorlaixSedi, 
                 data_MorlaixEau = data_MorlaixEau),
            file = output_excel_path)
+
 ```
 
 ```{r, Combine les .csv}
