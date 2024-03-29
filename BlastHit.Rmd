@@ -886,6 +886,7 @@ sets_listMorlaix <- list(
   MorlaixGDDEP = genres_MorlaixGDDEP
 )
 
+library(ggvenn)
 # Créer un diagramme de Venn avec ggvenn
 venn_plotMorlaix <- ggvenn(sets_listMorlaix, show_elements = TRUE,
   show_percentage = FALSE,
@@ -989,28 +990,14 @@ ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixEau.png", bar_plot_MorlaixEau, wi
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
-ggsave("FiguresMorlaix/venn_plotMorlaix.png", venn_plot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresMorlaix/venn_plotMorlaix.png", venn_plot, width = 6, height = 6, units = "in")
 
 ggsave("Figures/FiguresVerveur/bar_plotVerveur.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
-ggsave("FiguresMorlaix/venn_plotVerveur.png", venn_plot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresVerveur/venn_plotVerveur.png", venn_plot, width = 6, height = 6, units = "in")
 ```
 
-```{bash}
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\combined_dataMorlaix.xlsx"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\combined_dataVerveur.xlsx"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixEau.csv"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixGDDEP.csv"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixGDND.csv"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_MorlaixSedi.csv"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_VerveurEau.csv"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_VerveurGDDEP.csv"
-git rm "C:\Users\amrozins\Documents\workflow\Résultats\data_VerveurGDND.csv"
-
-
-
-```
 
