@@ -1,0 +1,1000 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+#Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
+
+```{r, eval=FALSE, packages mais il doit en manquer, voir avec les library}
+install.packages(c("VennDiagram", "VennCounts"))
+install.packages("readxl")
+
+```
+
+```{r library, include=FALSE}
+library(readxl)
+library(openxlsx)
+library(VennDiagram)
+library(DECIPHER)
+library(openxlsx)
+library(rmarkdown)
+library(knitr)
+library(phyloseq)
+library(dada2)
+library(DECIPHER)
+library(phangorn)
+library(ggplot2)
+library(gridExtra)
+library(shiny)
+library(miniUI)
+library(caret)
+library(pls)
+library(e1071)
+library(ggplot2)
+library(randomForest)
+library(dplyr)
+library(ggrepel)
+#library(nlme)
+library(devtools)
+library(reshape2)
+library(PMA)
+#library(structSSI)
+library(ade4)
+library(ggnetwork)
+library(intergraph)
+library(scales)
+library(genefilter)
+library(impute)
+library(phyloseqGraphTest)
+library(Biostrings)
+library(RSQLite)
+library(parallel)
+library(ape)
+library(taxonomizr)
+library('rBLAST')
+```
+
+```{r, eval=FALSE, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
+libdir='data'
+dir.create(libdir)
+setwd(libdir)
+getNamesAndNodes()
+getAccession2taxid(types=c('nucl_gb'))
+getAccession2taxid()
+system("gunzip *.gz")
+read.accession2taxid(list.files('.','accession2taxid'),'accessionTaxa.sql')
+print(paste('taxonomizr database built and located at', getwd(), sep=' '))
+```
+
+```{r, Ne lancer que si la commande suivante ne fonctionne pas en spécifiant le path de blast+}
+Sys.setenv(PATH = paste(Sys.getenv("PATH"), "C:/Program Files/NCBI/blast-2.15.0+/bin", sep= .Platform$path.sep))
+```
+
+```{r}
+#BLAST query
+file_list_MorlaixEau <- list.files('/Users/amrozins/Documents/workflow/Sequences/MorlaixEau', pattern = "\\.fa$", full.names = TRUE)
+file_list_MorlaixSedi <- list.files('/Users/amrozins/Documents/workflow/Sequences/MorlaixSedi', pattern = "\\.fa$", full.names = TRUE)
+file_list_MorlaixGDND <- list.files('/Users/amrozins/Documents/workflow/Sequences/MorlaixGDND', pattern = "\\.fa$", full.names = TRUE)
+file_list_MorlaixGDDEP <- list.files('/Users/amrozins/Documents/workflow/Sequences/MorlaixGDDEP', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurEau <- list.files('/Users/amrozins/Documents/workflow/Sequences/VerveurEau', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurSedi <- list.files('/Users/amrozins/Documents/workflow/Sequences/VerveurSedi', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurGDND <- list.files('/Users/amrozins/Documents/workflow/Sequences/VerveurGDND', pattern = "\\.fa$", full.names = TRUE)
+file_list_VerveurGDDEP <- list.files('/Users/amrozins/Documents/workflow/Sequences/VerveurGDDEP', pattern = "\\.fa$", full.names = TRUE)
+
+dna_MorlaixEau <- readDNAStringSet(file_list_MorlaixEau, format='fasta')
+dna_MorlaixSedi <- readDNAStringSet(file_list_MorlaixSedi, format='fasta')
+dna_MorlaixGDND <- readDNAStringSet(file_list_MorlaixGDND, format='fasta')
+dna_MorlaixGDDEP <- readDNAStringSet(file_list_MorlaixGDDEP, format='fasta')
+dna_VerveurEau <- readDNAStringSet(file_list_VerveurEau, format='fasta')
+dna_VerveurSedi <- readDNAStringSet(file_list_VerveurSedi, format='fasta')
+dna_VerveurGDND <- readDNAStringSet(file_list_VerveurGDND, format='fasta')
+dna_VerveurGDDEP <- readDNAStringSet(file_list_VerveurGDDEP, format='fasta')
+
+bl <- blast(db="/Users/amrozins/Documents/workflow/16S_ribosomal_RNA/16S_ribosomal_RNA")
+
+#Run BLAST query
+fmt <- "qseqid saccver pident length evalue qcovs"
+#When not provided, the default value is: 'qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+#voir rBLAST help
+cl_MorlaixEau <- predict(bl, dna_MorlaixEau, custom_format = fmt)
+cl_MorlaixSedi <- predict(bl, dna_MorlaixSedi, custom_format = fmt)
+cl_MorlaixGDND <- predict(bl, dna_MorlaixGDND, custom_format = fmt)
+cl_MorlaixGDDEP <- predict(bl, dna_MorlaixGDDEP, custom_format = fmt)
+cl_VerveurEau <- predict(bl, dna_VerveurEau, custom_format = fmt)
+cl_VerveurSedi <- predict(bl, dna_VerveurSedi, custom_format = fmt)
+cl_VerveurGDND <- predict(bl, dna_VerveurGDND, custom_format = fmt)
+cl_VerveurGDDEP <- predict(bl, dna_VerveurGDDEP, custom_format = fmt)
+
+cl_MorlaixEau[1:5,]
+#to view first 5 hits
+summary(cl_MorlaixEau)
+cl_MorlaixSedi[1:5,]
+summary(cl_MorlaixSedi)
+cl_MorlaixGDND[1:5,]
+summary(cl_MorlaixGDND)
+cl_MorlaixGDDEP[1:5,]
+summary(cl_MorlaixGDDEP)
+cl_VerveurEau[1:5,]
+summary(cl_VerveurEau)
+cl_VerveurSedi[1:5,]
+summary(cl_VerveurSedi)
+cl_VerveurGDND[1:5,]
+summary(cl_VerveurGDND)
+cl_VerveurGDDEP[1:5,]
+summary(cl_VerveurGDDEP)
+```
+
+```{r}
+accid_MorlaixEau = as.character(cl_MorlaixEau$saccver)
+accid_MorlaixSedi = as.character(cl_MorlaixSedi$saccver)
+accid_MorlaixGDND = as.character(cl_MorlaixGDND$saccver)
+accid_MorlaixGDDEP = as.character(cl_MorlaixGDDEP$saccver)
+accid_VerveurEau = as.character(cl_VerveurEau$saccver)
+accid_VerveurSedi = as.character(cl_VerveurSedi$saccver)
+accid_VerveurGDND = as.character(cl_VerveurGDND$saccver)
+accid_VerveurGDDEP = as.character(cl_VerveurGDDEP$saccver)
+```
+
+```{r}
+taxaNodes<-read.nodes.sql("/Users/amrozins/Documents/workflow/data/nodes.dmp")
+taxaNames<-read.names.sql("/Users/amrozins/Documents/workflow/data/names.dmp")
+```
+
+```{r}
+#takes accession number and gets the taxonomic ID
+ids_MorlaixEau<-accessionToTaxa(accid_MorlaixEau, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+#taxlist displays the taxonomic names from each ID #
+taxlist_MorlaixEau=getTaxonomy(ids_MorlaixEau, taxaNodes, taxaNames)
+ids_MorlaixSedi<-accessionToTaxa(accid_MorlaixSedi, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_MorlaixSedi=getTaxonomy(ids_MorlaixSedi, taxaNodes, taxaNames)
+ids_MorlaixGDND<-accessionToTaxa(accid_MorlaixGDND, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_MorlaixGDND=getTaxonomy(ids_MorlaixGDND, taxaNodes, taxaNames)
+ids_MorlaixGDDEP<-accessionToTaxa(accid_MorlaixGDDEP, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_MorlaixGDDEP=getTaxonomy(ids_MorlaixGDDEP, taxaNodes, taxaNames)
+ids_VerveurEau<-accessionToTaxa(accid_VerveurEau, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurEau=getTaxonomy(ids_VerveurEau, taxaNodes, taxaNames)
+ids_VerveurSedi<-accessionToTaxa(accid_VerveurSedi, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurSedi=getTaxonomy(ids_VerveurSedi, taxaNodes, taxaNames)
+ids_VerveurGDND<-accessionToTaxa(accid_VerveurGDND, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurGDND=getTaxonomy(ids_VerveurGDND, taxaNodes, taxaNames)
+ids_VerveurGDDEP<-accessionToTaxa(accid_VerveurGDDEP, '/Users/amrozins/Documents/workflow/data/accessionTaxa.sql')
+taxlist_VerveurGDDEP=getTaxonomy(ids_VerveurGDDEP, taxaNodes, taxaNames)
+```
+
+```{r, Résultats Totaux MorlaixEau}
+cltax_MorlaixEau=cbind(cl_MorlaixEau,taxlist_MorlaixEau) #bind BLAST hits and taxonomy table
+colnames(cltax_MorlaixEau)
+cltax_MorlaixEau
+```
+
+```{r, Résultats Totaux MorlaixSedi}
+cltax_MorlaixSedi=cbind(cl_MorlaixSedi,taxlist_MorlaixSedi) #bind BLAST hits and taxonomy table
+colnames(cltax_MorlaixSedi)
+cltax_MorlaixSedi
+```
+
+```{r, Résultats Totaux MorlaixGDND}
+cltax_MorlaixGDND=cbind(cl_MorlaixGDND,taxlist_MorlaixGDND) 
+colnames(cltax_MorlaixGDND)
+cltax_MorlaixGDND
+```
+
+```{r, Résultats Totaux MorlaixGDDEP}
+cltax_MorlaixGDDEP=cbind(cl_MorlaixGDDEP,taxlist_MorlaixGDDEP)
+colnames(cltax_MorlaixGDDEP)
+cltax_MorlaixGDDEP
+```
+
+```{r, Résultats Totaux VerveurEau}
+cltax_VerveurEau=cbind(cl_VerveurEau,taxlist_VerveurEau) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurEau)
+cltax_VerveurEau
+```
+
+```{r, Résultats Totaux VerveurSedi}
+cltax_VerveurSedi=cbind(cl_VerveurSedi,taxlist_VerveurSedi) #bind BLAST hits and taxonomy table
+colnames(cltax_VerveurSedi)
+cltax_VerveurSedi
+```
+
+```{r, Résultats Totaux VerveurGDND}
+cltax_VerveurGDND=cbind(cl_VerveurGDND,taxlist_VerveurGDND) 
+colnames(cltax_VerveurGDND)
+cltax_VerveurGDND
+```
+
+```{r, Résultats Totaux VerveurGDDEP}
+cltax_VerveurGDDEP=cbind(cl_VerveurGDDEP,taxlist_VerveurGDDEP)
+colnames(cltax_VerveurGDDEP)
+cltax_VerveurGDDEP
+```
+
+```{r, top 5}
+# Tri des résultats par qseqid et pident décroissants
+cltax_sorted_MorlaixEau <- cltax_MorlaixEau %>% arrange(qseqid, desc(pident))
+
+# Sélection des 5 premiers résultats pour chaque qseqid
+cltax5_MorlaixEau <- cltax_sorted_MorlaixEau %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixEau)
+```
+
+```{r, top 5}
+cltax_sorted_MorlaixSedi <- cltax_MorlaixSedi %>% arrange(qseqid, desc(pident))
+cltax5_MorlaixSedi <- cltax_sorted_MorlaixSedi %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixSedi)
+```
+
+```{r, top 5}
+cltax_sorted_MorlaixGDND <- cltax_MorlaixGDND %>% arrange(qseqid, desc(pident))
+cltax5_MorlaixGDND <- cltax_sorted_MorlaixGDND %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixGDND)
+```
+
+```{r, top 5}
+cltax_sorted_MorlaixGDDEP <- cltax_MorlaixGDDEP %>% arrange(qseqid, desc(pident))
+cltax5_MorlaixGDDEP <- cltax_sorted_MorlaixGDDEP %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_MorlaixGDDEP)
+```
+
+```{r, top 5}
+# Tri des résultats par qseqid et pident décroissants
+cltax_sorted_VerveurEau <- cltax_VerveurEau %>% arrange(qseqid, desc(pident))
+
+# Sélection des 5 premiers résultats pour chaque qseqid
+cltax5_VerveurEau <- cltax_sorted_VerveurEau %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurEau)
+```
+
+```{r, top 5}
+cltax_sorted_VerveurSedi <- cltax_VerveurSedi %>% arrange(qseqid, desc(pident))
+cltax5_VerveurSedi <- cltax_sorted_VerveurSedi %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurSedi)
+```
+
+```{r, top 5}
+cltax_sorted_VerveurGDND <- cltax_VerveurGDND %>% arrange(qseqid, desc(pident))
+cltax5_VerveurGDND <- cltax_sorted_VerveurGDND %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurGDND)
+```
+
+```{r, top 5}
+cltax_sorted_VerveurGDDEP <- cltax_VerveurGDDEP %>% arrange(qseqid, desc(pident))
+cltax5_VerveurGDDEP <- cltax_sorted_VerveurGDDEP %>% group_by(qseqid) %>% slice_head(n = 5)
+print(cltax5_VerveurGDDEP)
+```
+
+```{r, max % identité}
+#Ne prend pour chaque fasta que le résultat avec le max de % identity (pident)
+filtered_cltax_MorlaixEau <- cltax_sorted_MorlaixEau %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+
+filtered_cltax_MorlaixEau
+```
+
+```{r, max % identité}
+filtered_cltax_MorlaixSedi <- cltax_sorted_MorlaixSedi %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_MorlaixSedi
+```
+
+```{r, max % identité}
+filtered_cltax_MorlaixGDND <- cltax_sorted_MorlaixGDND %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_MorlaixGDND
+```
+
+```{r, max % identité}
+filtered_cltax_MorlaixGDDEP <- cltax_sorted_MorlaixGDDEP %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_MorlaixGDDEP
+```
+
+```{r, max % identité}
+#Ne prend pour chaque fasta que le résultat avec le max de % identity (pident)
+filtered_cltax_VerveurEau <- cltax_sorted_VerveurEau %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+
+filtered_cltax_VerveurEau
+```
+
+```{r, max % identité}
+filtered_cltax_VerveurSedi <- cltax_sorted_VerveurSedi %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurSedi
+```
+
+```{r, max % identité}
+filtered_cltax_VerveurGDND <- cltax_sorted_VerveurGDND %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurGDND
+```
+
+```{r, max % identité}
+filtered_cltax_VerveurGDDEP <- cltax_sorted_VerveurGDDEP %>%
+  group_by(qseqid) %>%
+  filter(pident == max(pident))
+filtered_cltax_VerveurGDDEP
+```
+
+#Pour sortir les TabRésultats
+
+```{r}
+#Résultats de taxo et ajoutes la longueur de la séquence et la séquence
+data_MorlaixEau <- subset(filtered_cltax_MorlaixEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+
+# Emplacement des fichiers .fasta
+chemin_du_dossier_MorlaixEau <- "/Users/amrozins/Documents/workflow/Sequences/MorlaixEau"
+
+# Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
+lire_fasta_MorlaixEau <- function(qseqid, chemin_du_dossier_MorlaixEau) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixEau <- list.files(chemin_du_dossier_MorlaixEau, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixEau) > 0) {
+        seqs_MorlaixEau <- readDNAStringSet(fichiers_MorlaixEau[1], format = "fasta")
+        return(as.character(seqs_MorlaixEau))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+# Ajouter une colonne au DataFrame avec le contenu des fichiers FASTA
+data_MorlaixEau$sequence <- sapply(data_MorlaixEau$qseqid, lire_fasta_MorlaixEau, chemin_du_dossier_MorlaixEau)
+
+# Ajouter une colonne avec la longueur des séquences dans contenu_fasta
+data_MorlaixEau$longueur_sequence_pb <- sapply(data_MorlaixEau$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixEau <- data_MorlaixEau[, c(names(data_MorlaixEau)[names(data_MorlaixEau) != "sequence"], "sequence")]
+
+# Afficher le DataFrame mis à jour
+print(data_MorlaixEau)
+```
+
+
+```{r}
+data_MorlaixSedi <- subset(filtered_cltax_MorlaixSedi, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+chemin_du_dossier_MorlaixSedi <- "/Users/amrozins/Documents/workflow/Sequences/MorlaixSedi"
+
+lire_fasta_MorlaixSedi <- function(qseqid, chemin_du_dossier_MorlaixSedi) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixSedi <- list.files(chemin_du_dossier_MorlaixSedi, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixSedi) > 0) {
+        seqs_MorlaixSedi <- readDNAStringSet(fichiers_MorlaixSedi[1], format = "fasta")
+        return(as.character(seqs_MorlaixSedi))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_MorlaixSedi$sequence <- sapply(data_MorlaixSedi$qseqid, lire_fasta_MorlaixSedi, chemin_du_dossier_MorlaixSedi)
+data_MorlaixSedi$longueur_sequence_pb <- sapply(data_MorlaixSedi$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixSedi <- data_MorlaixSedi[, c(names(data_MorlaixSedi)[names(data_MorlaixSedi) != "sequence"], "sequence")]
+print(data_MorlaixSedi)
+```
+
+
+```{r}
+data_MorlaixGDND <- subset(filtered_cltax_MorlaixGDND, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+chemin_du_dossier_MorlaixGDND <- "/Users/amrozins/Documents/workflow/Sequences/MorlaixGDND"
+
+lire_fasta_MorlaixGDND <- function(qseqid, chemin_du_dossier_MorlaixGDND) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixGDND <- list.files(chemin_du_dossier_MorlaixGDND, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixGDND) > 0) {
+        seqs_MorlaixGDND <- readDNAStringSet(fichiers_MorlaixGDND[1], format = "fasta")
+        return(as.character(seqs_MorlaixGDND))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_MorlaixGDND$sequence <- sapply(data_MorlaixGDND$qseqid, lire_fasta_MorlaixGDND, chemin_du_dossier_MorlaixGDND)
+data_MorlaixGDND$longueur_sequence_pb <- sapply(data_MorlaixGDND$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixGDND <- data_MorlaixGDND[, c(names(data_MorlaixGDND)[names(data_MorlaixGDND) != "sequence"], "sequence")]
+print(data_MorlaixGDND)
+```
+
+```{r}
+data_MorlaixGDDEP <- subset(filtered_cltax_MorlaixGDDEP, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+chemin_du_dossier_MorlaixGDDEP <- "/Users/amrozins/Documents/workflow/Sequences/MorlaixGDDEP"
+
+lire_fasta_MorlaixGDDEP <- function(qseqid, chemin_du_dossier_MorlaixGDDEP) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_MorlaixGDDEP <- list.files(chemin_du_dossier_MorlaixGDDEP, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_MorlaixGDDEP) > 0) {
+        seqs_MorlaixGDDEP <- readDNAStringSet(fichiers_MorlaixGDDEP[1], format = "fasta")
+        return(as.character(seqs_MorlaixGDDEP))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_MorlaixGDDEP$sequence <- sapply(data_MorlaixGDDEP$qseqid, lire_fasta_MorlaixGDDEP, chemin_du_dossier_MorlaixGDDEP)
+data_MorlaixGDDEP$longueur_sequence_pb <- sapply(data_MorlaixGDDEP$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_MorlaixGDDEP <- data_MorlaixGDDEP[, c(names(data_MorlaixGDDEP)[names(data_MorlaixGDDEP) != "sequence"], "sequence")]
+print(data_MorlaixGDDEP)
+```
+
+```{r}
+#Résultats de taxo et ajoutes la longueur de la séquence et la séquence
+data_VerveurEau <- subset(filtered_cltax_VerveurEau, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+
+# Emplacement des fichiers .fasta
+chemin_du_dossier_VerveurEau <- "/Users/amrozins/Documents/workflow/Sequences/VerveurEau"
+
+# Fonction pour lire le contenu d'un fichier FASTA avec correspondance partielle
+lire_fasta_VerveurEau <- function(qseqid, chemin_du_dossier_VerveurEau) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurEau <- list.files(chemin_du_dossier_VerveurEau, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurEau) > 0) {
+        seqs_VerveurEau <- readDNAStringSet(fichiers_VerveurEau[1], format = "fasta")
+        return(as.character(seqs_VerveurEau))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+# Ajouter une colonne au DataFrame avec le contenu des fichiers FASTA
+data_VerveurEau$sequence <- sapply(data_VerveurEau$qseqid, lire_fasta_VerveurEau, chemin_du_dossier_VerveurEau)
+
+# Ajouter une colonne avec la longueur des séquences dans contenu_fasta
+data_VerveurEau$longueur_sequence_pb <- sapply(data_VerveurEau$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurEau <- data_VerveurEau[, c(names(data_VerveurEau)[names(data_VerveurEau) != "sequence"], "sequence")]
+
+# Afficher le DataFrame mis à jour
+print(data_VerveurEau)
+```
+
+
+
+
+```{r}
+data_VerveurSedi <- subset(filtered_cltax_VerveurSedi, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+chemin_du_dossier_VerveurSedi <- "/Users/amrozins/Documents/workflow/Sequences/VerveurSedi"
+
+lire_fasta_VerveurSedi <- function(qseqid, chemin_du_dossier_VerveurSedi) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurSedi <- list.files(chemin_du_dossier_VerveurSedi, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurSedi) > 0) {
+        seqs_VerveurSedi <- readDNAStringSet(fichiers_VerveurSedi[1], format = "fasta")
+        return(as.character(seqs_VerveurSedi))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurSedi$sequence <- sapply(data_VerveurSedi$qseqid, lire_fasta_VerveurSedi, chemin_du_dossier_VerveurSedi)
+data_VerveurSedi$longueur_sequence_pb <- sapply(data_VerveurSedi$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurSedi <- data_VerveurSedi[, c(names(data_VerveurSedi)[names(data_VerveurSedi) != "sequence"], "sequence")]
+print(data_VerveurSedi)
+```
+
+```{r}
+data_VerveurGDND <- subset(filtered_cltax_VerveurGDND, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+chemin_du_dossier_VerveurGDND <- "/Users/amrozins/Documents/workflow/Sequences/VerveurGDND"
+
+lire_fasta_VerveurGDND <- function(qseqid, chemin_du_dossier_VerveurGDND) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurGDND <- list.files(chemin_du_dossier_VerveurGDND, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurGDND) > 0) {
+        seqs_VerveurGDND <- readDNAStringSet(fichiers_VerveurGDND[1], format = "fasta")
+        return(as.character(seqs_VerveurGDND))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurGDND$sequence <- sapply(data_VerveurGDND$qseqid, lire_fasta_VerveurGDND, chemin_du_dossier_VerveurGDND)
+data_VerveurGDND$longueur_sequence_pb <- sapply(data_VerveurGDND$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurGDND <- data_VerveurGDND[, c(names(data_VerveurGDND)[names(data_VerveurGDND) != "sequence"], "sequence")]
+print(data_VerveurGDND)
+```
+
+```{r}
+data_VerveurGDDEP <- subset(filtered_cltax_VerveurGDDEP, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+chemin_du_dossier_VerveurGDDEP <- "/Users/amrozins/Documents/workflow/Sequences/VerveurGDDEP"
+
+lire_fasta_VerveurGDDEP <- function(qseqid, chemin_du_dossier_VerveurGDDEP) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers_VerveurGDDEP <- list.files(chemin_du_dossier_VerveurGDDEP, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers_VerveurGDDEP) > 0) {
+        seqs_VerveurGDDEP <- readDNAStringSet(fichiers_VerveurGDDEP[1], format = "fasta")
+        return(as.character(seqs_VerveurGDDEP))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+data_VerveurGDDEP$sequence <- sapply(data_VerveurGDDEP$qseqid, lire_fasta_VerveurGDDEP, chemin_du_dossier_VerveurGDDEP)
+data_VerveurGDDEP$longueur_sequence_pb <- sapply(data_VerveurGDDEP$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+data_VerveurGDDEP <- data_VerveurGDDEP[, c(names(data_VerveurGDDEP)[names(data_VerveurGDDEP) != "sequence"], "sequence")]
+print(data_VerveurGDDEP)
+```
+
+```{r, Sauvegarder data_MorlaixGDND au format CSV}
+write.csv(data_MorlaixGDND, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixGDND.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_MorlaixGDDEP au format CSV}
+write.csv(data_MorlaixGDDEP, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixGDDEP.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_MorlaixSedi au format CSV}
+write.csv(data_MorlaixSedi, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixSedi.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_MorlaixEau au format CSV}
+write.csv(data_MorlaixEau, "/Users/amrozins/Documents/workflow/Résultats/data_MorlaixEau.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_VerveurGDND au format CSV}
+write.csv(data_VerveurGDND, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurGDND.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_VerveurGDDEP au format CSV}
+write.csv(data_VerveurGDDEP, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurGDDEP.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_VerveurSedi au format CSV}
+write.csv(data_VerveurSedi, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurSedi.csv", row.names = FALSE)
+```
+
+```{r, Sauvegarder data_VerveurEau au format CSV}
+write.csv(data_VerveurEau, "/Users/amrozins/Documents/workflow/Résultats/data_VerveurEau.csv", row.names = FALSE)
+```
+
+```{r, Combine les .csv}
+# Chemin du fichier Excel de sortie
+output_excel_path <- "/Users/amrozins/Documents/workflow/Résultats/combined_dataMorlaix.xlsx"
+
+# Écrire les données dans un fichier Excel avec plusieurs feuilles
+write.xlsx(list(data_MorlaixGDND = data_MorlaixGDND, 
+                data_MorlaixGDDEP = data_MorlaixGDDEP,
+                data_MorlaixSedi = data_MorlaixSedi, 
+                data_MorlaixEau = data_MorlaixEau),
+           file = output_excel_path)
+```
+
+```{r, Combine les .csv}
+# Chemin du fichier Excel de sortie
+output_excel_path <- "/Users/amrozins/Documents/workflow/Résultats/combined_dataVerveur.xlsx"
+
+# Écrire les données dans un fichier Excel avec plusieurs feuilles
+write.xlsx(list(data_VerveurGDND = data_VerveurGDND, 
+                data_VerveurGDDEP = data_VerveurGDDEP,
+                data_VerveurSedi = data_VerveurSedi, 
+                data_VerveurEau = data_VerveurEau),
+           file = output_excel_path)
+```
+
+#Représentations Graphique
+
+```{r, Représentation graphique des genres les plus retrouvés pour Morlaix Eau / Sédiments / GD}
+# Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
+filtered_data_MorlaixEau <- data_MorlaixEau[order(-data_MorlaixEau$pident), ]
+filtered_data_MorlaixEau <- filtered_data_MorlaixEau[!duplicated(filtered_data_MorlaixEau$qseqid), ]
+
+filtered_data_MorlaixSedi <- data_MorlaixSedi[order(-data_MorlaixSedi$pident), ]
+filtered_data_MorlaixSedi <- filtered_data_MorlaixSedi[!duplicated(filtered_data_MorlaixSedi$qseqid), ]
+
+filtered_data_MorlaixGDND <- data_MorlaixGDND[order(-data_MorlaixGDND$pident), ]
+filtered_data_MorlaixGDND <- filtered_data_MorlaixGDND[!duplicated(filtered_data_MorlaixGDND$qseqid), ]
+
+filtered_data_MorlaixGDDEP <- data_MorlaixGDDEP[order(-data_MorlaixGDDEP$pident), ]
+filtered_data_MorlaixGDDEP <- filtered_data_MorlaixGDDEP[!duplicated(filtered_data_MorlaixGDDEP$qseqid), ]
+
+# Combinez les données filtrées en une seule dataframe
+all_filtered_dataMorlaix <- rbind(filtered_data_MorlaixEau, filtered_data_MorlaixSedi, filtered_data_MorlaixGDND, filtered_data_MorlaixGDDEP)
+
+# Tableau de comptage des genres
+genre_countsMorlaix <- table(all_filtered_dataMorlaix$genus)
+
+# Sélectionnez les 10 genres les plus retrouvés
+top_genresMorlaix <- head(sort(genre_countsMorlaix, decreasing = TRUE), 10)
+
+# Créez le graphique à barres
+bar_plotMorlaix <- ggplot(data.frame(Genus = names(top_genresMorlaix), Count = as.numeric(top_genresMorlaix)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Top 10 Genres les plus retrouvés pour Morlaix : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_dataMorlaix)), hjust = 1, vjust = 0)
+
+print(bar_plotMorlaix)
+```
+
+```{r, Représentation graphique des genres les plus retrouvés pour Verveur Eau / Sédiments / GD}
+# Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
+filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
+filtered_data_VerveurEau <- filtered_data_VerveurEau[!duplicated(filtered_data_VerveurEau$qseqid), ]
+
+filtered_data_VerveurSedi <- data_VerveurSedi[order(-data_VerveurSedi$pident), ]
+filtered_data_VerveurSedi <- filtered_data_VerveurSedi[!duplicated(filtered_data_VerveurSedi$qseqid), ]
+
+filtered_data_VerveurGDND <- data_VerveurGDND[order(-data_VerveurGDND$pident), ]
+filtered_data_VerveurGDND <- filtered_data_VerveurGDND[!duplicated(filtered_data_VerveurGDND$qseqid), ]
+
+filtered_data_VerveurGDDEP <- data_VerveurGDDEP[order(-data_VerveurGDDEP$pident), ]
+filtered_data_VerveurGDDEP <- filtered_data_VerveurGDDEP[!duplicated(filtered_data_VerveurGDDEP$qseqid), ]
+
+# Combinez les données filtrées en une seule dataframe
+all_filtered_dataVerveur <- rbind(filtered_data_VerveurEau, filtered_data_VerveurSedi, filtered_data_VerveurGDND, filtered_data_VerveurGDDEP)
+
+# Tableau de comptage des genres
+genre_countsVerveur <- table(all_filtered_dataVerveur$genus)
+
+# Sélectionnez les 10 genres les plus retrouvés
+top_genresVerveur <- head(sort(genre_countsVerveur, decreasing = TRUE), 10)
+
+# Créez le graphique à barres
+bar_plotVerveur <- ggplot(data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightgreen") +
+  labs(title = "Top 10 Genres les plus retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_dataVerveur)), hjust = 1, vjust = 0)
+
+print(bar_plotVerveur)
+```
+
+```{r}
+# Combinaison des données pour les deux villes
+top_genres_combined <- rbind(
+  data.frame(Genus = names(top_genresMorlaix), Count = as.numeric(top_genresMorlaix)),
+  data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur))
+)
+
+# Agrégation des comptes pour chaque genre
+top_genres_combined <- aggregate(Count ~ Genus, data = top_genres_combined, sum)
+
+# Tracé du graphique
+bar_plot_combined <- ggplot(top_genres_combined, aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
+  labs(title = "Top 10 Genres les plus retrouvés pour les deux sites combinés", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 20, 1), limits = c(0, 20)) +  # Modifier l'échelle des données y
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", sum(top_genres_combined$Count)), hjust = 1, vjust = 0)
+
+print(bar_plot_combined)
+```
+
+```{r, Représentation graphique des genres les plus retrouvés pour Verveur et Morlaix Eau / Sédiments / GD}
+# Création des dataframes avec une colonne "Count"
+top_genresMorlaix_df <- data.frame(Genus = names(top_genresMorlaix), Count = as.numeric(top_genresMorlaix))
+top_genresVerveur_df <- data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur))
+
+# Ajout d'une colonne "Ville" pour chaque dataframe
+top_genresMorlaix_df$Ville <- "Morlaix"
+top_genresVerveur_df$Ville <- "Verveur"
+
+# Combinaison des deux dataframes
+top_genres_combined2 <- rbind(top_genresMorlaix_df, top_genresVerveur_df)
+
+# Tracé du graphique combiné
+bar_plot_combined2 <- ggplot(top_genres_combined2, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
+  labs(title = "Top 10 Genres les plus retrouvés pour les deux sites", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("Morlaix" = "skyblue", "Verveur" = "lightgreen")) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
+  annotate("text", x = Inf, y = 12, label = paste("Total de séquences pour Morlaix:", sum(top_genresMorlaix), "\nTotal de séquences pour Verveur:", sum(top_genresVerveur)), hjust = 1, vjust = -0.1)
+
+print(bar_plot_combined2)
+```
+
+```{r, Uniquement pour Morlaix Eau} 
+filtered_data_MorlaixEau <- data_MorlaixEau[order(-data_MorlaixEau$pident), ]
+filtered_data_MorlaixEau <- filtered_data_MorlaixEau[!duplicated(filtered_data_MorlaixEau$qseqid), ]
+
+genre_counts_MorlaixEau <- table(filtered_data_MorlaixEau$genus)
+
+top_genres_MorlaixEau <- head(sort(genre_counts_MorlaixEau, decreasing = TRUE), 10)
+
+bar_plot_MorlaixEau <- ggplot(data.frame(Genus = names(top_genres_MorlaixEau), Count = as.numeric(top_genres_MorlaixEau)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Morlaix Eau", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixEau)), hjust = 1, vjust = 0)
+
+print(bar_plot_MorlaixEau)
+```
+
+```{r, Uniquement pour Verveur Eau} 
+filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
+filtered_data_VerveurEau <- filtered_data_VerveurEau[!duplicated(filtered_data_VerveurEau$qseqid), ]
+
+genre_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
+
+top_genres_VerveurEau <- head(sort(genre_counts_VerveurEau, decreasing = TRUE), 10)
+
+bar_plot_VerveurEau <- ggplot(data.frame(Genus = names(top_genres_VerveurEau), Count = as.numeric(top_genres_VerveurEau)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur Eau", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurEau)), hjust = 1, vjust = 0)
+
+print(bar_plot_VerveurEau)
+```
+
+```{r, Uniquement pour Morlaix Sédiments} 
+filtered_data_MorlaixSedi <- data_MorlaixSedi[order(-data_MorlaixSedi$pident), ]
+filtered_data_MorlaixSedi <- filtered_data_MorlaixSedi[!duplicated(filtered_data_MorlaixSedi$qseqid), ]
+
+genre_counts_MorlaixSedi <- table(filtered_data_MorlaixSedi$genus)
+
+top_genres_MorlaixSedi <- head(sort(genre_counts_MorlaixSedi, decreasing = TRUE), 10)
+
+bar_plot_MorlaixSedi <- ggplot(data.frame(Genus = names(top_genres_MorlaixSedi), Count = as.numeric(top_genres_MorlaixSedi)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Morlaix Sédiments", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixSedi)), hjust = 1, vjust = 0)
+  
+print(bar_plot_MorlaixSedi)
+```
+```{r, Uniquement pour Verveur Sédiments} 
+filtered_data_VerveurSedi <- data_VerveurSedi[order(-data_VerveurSedi$pident), ]
+filtered_data_VerveurSedi <- filtered_data_VerveurSedi[!duplicated(filtered_data_VerveurSedi$qseqid), ]
+
+genre_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
+
+top_genres_VerveurSedi <- head(sort(genre_counts_VerveurSedi, decreasing = TRUE), 10)
+
+bar_plot_VerveurSedi <- ggplot(data.frame(Genus = names(top_genres_VerveurSedi), Count = as.numeric(top_genres_VerveurSedi)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur Sédiments", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurSedi)), hjust = 1, vjust = 0)
+  
+print(bar_plot_VerveurSedi)
+```
+
+```{r, Uniquement pour Morlaix GDND} 
+filtered_data_MorlaixGDND <- data_MorlaixGDND[order(-data_MorlaixGDND$pident), ]
+filtered_data_MorlaixGDND <- filtered_data_MorlaixGDND[!duplicated(filtered_data_MorlaixGDND$qseqid), ]
+
+genre_counts_MorlaixGDND <- table(filtered_data_MorlaixGDND$genus)
+
+top_genres_MorlaixGDND <- head(sort(genre_counts_MorlaixGDND, decreasing = TRUE), 10)
+
+bar_plot_MorlaixGDND <- ggplot(data.frame(Genus = names(top_genres_MorlaixGDND), Count = as.numeric(top_genres_MorlaixGDND)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 3, 1), limits = c(0, 3)) +  # Modifier l'échelle des données y
+  labs(title = "Top 10 Genres les plus retrouvés - Morlaix GDND", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixGDND)), hjust = 1, vjust = 0)
+  
+print(bar_plot_MorlaixGDND)
+```
+
+```{r, Uniquement pour Verveur GDND} 
+filtered_data_VerveurGDND <- data_VerveurGDND[order(-data_VerveurGDND$pident), ]
+filtered_data_VerveurGDND <- filtered_data_VerveurGDND[!duplicated(filtered_data_VerveurGDND$qseqid), ]
+
+genre_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
+
+top_genres_VerveurGDND <- head(sort(genre_counts_VerveurGDND, decreasing = TRUE), 10)
+
+bar_plot_VerveurGDND <- ggplot(data.frame(Genus = names(top_genres_VerveurGDND), Count = as.numeric(top_genres_VerveurGDND)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur GDND", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurGDND)), hjust = 1, vjust = 0)
+  
+print(bar_plot_VerveurGDND)
+```
+
+```{r, Uniquement pour Morlaix GDDEP} 
+filtered_data_MorlaixGDDEP <- data_MorlaixGDDEP[order(-data_MorlaixGDDEP$pident), ]
+filtered_data_MorlaixGDDEP <- filtered_data_MorlaixGDDEP[!duplicated(filtered_data_MorlaixGDDEP$qseqid), ]
+
+genre_counts_MorlaixGDDEP <- table(filtered_data_MorlaixGDDEP$genus)
+
+top_genres_MorlaixGDDEP <- head(sort(genre_counts_MorlaixGDDEP, decreasing = TRUE), 10)
+
+bar_plot_MorlaixGDDEP <- ggplot(data.frame(Genus = names(top_genres_MorlaixGDDEP), Count = as.numeric(top_genres_MorlaixGDDEP)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Morlaix GDDEP", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_MorlaixGDDEP)), hjust = 1, vjust = 0)
+  
+print(bar_plot_MorlaixGDDEP)
+```
+
+```{r, Uniquement pour Verveur GDDEP} 
+filtered_data_VerveurGDDEP <- data_VerveurGDDEP[order(-data_VerveurGDDEP$pident), ]
+filtered_data_VerveurGDDEP <- filtered_data_VerveurGDDEP[!duplicated(filtered_data_VerveurGDDEP$qseqid), ]
+
+genre_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
+
+top_genres_VerveurGDDEP <- head(sort(genre_counts_VerveurGDDEP, decreasing = TRUE), 10)
+
+bar_plot_VerveurGDDEP <- ggplot(data.frame(Genus = names(top_genres_VerveurGDDEP), Count = as.numeric(top_genres_VerveurGDDEP)), 
+                              aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Top 10 Genres les plus retrouvés - Verveur GDDEP", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurGDDEP)), hjust = 1, vjust = 0)
+  
+print(bar_plot_VerveurGDDEP)
+```
+
+
+
+```{r, diagramme de Venn}
+# Extraire les genres uniques de chaque échantillon
+genres_MorlaixEau <- unique(data_MorlaixEau$genus)
+genres_MorlaixSedi <- unique(data_MorlaixSedi$genus)
+genres_MorlaixGDND <- unique(data_MorlaixGDND$genus)
+genres_MorlaixGDDEP <- unique(data_MorlaixGDDEP$genus)
+
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_listMorlaix <- list(
+  MorlaixEau = genres_MorlaixEau,
+  MorlaixSedi = genres_MorlaixSedi,
+  MorlaixGDND = genres_MorlaixGDND,
+  MorlaixGDDEP = genres_MorlaixGDDEP
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plotMorlaix <- ggvenn(sets_listMorlaix, show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("skyblue", "yellow", "green", "red"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 3,  # Ajustez la taille de la police ici MorlaixSedi MorlaixEau MorlaixGD..
+  text_size = 2,  # Ajustez la taille de la police pour les genres
+  label_sep = "
+  ",
+  count_column = NULL,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plotMorlaix$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plotMorlaix +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
+```{r}
+# Extraire les genres uniques de chaque échantillon
+genres_VerveurEau <- unique(data_VerveurEau$genus)
+genres_VerveurSedi <- unique(data_VerveurSedi$genus)
+genres_VerveurGDND <- unique(data_VerveurGDND$genus)
+genres_VerveurGDDEP <- unique(data_VerveurGDDEP$genus)
+
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_listVerveur <- list(
+  VerveurEau = genres_VerveurEau,
+  VerveurSedi = genres_VerveurSedi,
+  VerveurGDND = genres_VerveurGDND,
+  VerveurGDDEP = genres_VerveurGDDEP
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plotVerveur <- ggvenn(sets_listVerveur , show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("skyblue", "yellow", "green", "red"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 3,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
+  text_size = 2,  # Ajustez la taille de la police pour les genres
+  label_sep = "
+  ",
+  count_column = NULL,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plotVerveur$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plotVerveur +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
+```{r}
+library(gridExtra)
+
+pdf("Figures/Figures.pdf", width = 12, height = 8)
+
+grid.arrange(bar_plotMorlaix, bar_plotVerveur, bar_plot_combined, bar_plot_combined2,
+             ncol = 2)
+
+grid.arrange(bar_plot_MorlaixEau, bar_plot_MorlaixSedi, bar_plot_MorlaixGDND, bar_plot_MorlaixGDDEP,
+             ncol = 2)  # Organise les graphiques en 2 colonnes
+
+grid.arrange(bar_plot_VerveurEau, bar_plot_VerveurSedi, bar_plot_VerveurGDND, bar_plot_VerveurGDDEP,
+             ncol = 2)
+
+grid.arrange(venn_plotMorlaix, venn_plotVerveur,
+             ncol = 2)
+
+dev.off()
+```
+
+```{r, sauvegarde des figures indiv}
+ggsave("Figures/FiguresCommun/bar_plot_combined.png", bar_plot, width = 10, height = 6, units = "in")
+ggsave("Figures/FiguresCommun/bar_plot_combined2.png", bar_plot, width = 10, height = 6, units = "in")
+
+
+ggsave("Figures/FiguresMorlaix/bar_plot_Morlaix.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
+ggsave("FiguresMorlaix/venn_plotMorlaix.png", venn_plot, width = 6, height = 6, units = "in")
+
+ggsave("Figures/FiguresVerveur/bar_plotVerveur.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresVerveur/bar_plot_VerveurEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresVerveur/bar_plot_VerveurSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
+ggsave("FiguresMorlaix/venn_plotVerveur.png", venn_plot, width = 6, height = 6, units = "in")
+```
