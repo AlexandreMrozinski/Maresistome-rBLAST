@@ -52,6 +52,7 @@ library(parallel)
 library(ape)
 library(taxonomizr)
 library('rBLAST')
+library(reshape2)
 ```
 
 ```{r, eval=FALSE, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
@@ -633,6 +634,27 @@ bar_plotMorlaix <- ggplot(data.frame(Genus = names(top_genresMorlaix), Count = a
 print(bar_plotMorlaix)
 ```
 
+```{r}
+# Tableau de comptage des genres
+genre_countsMorlaix <- table(all_filtered_dataMorlaix$genus)
+
+# Compter le nombre total de genres
+total_genres <- length(unique(all_filtered_dataMorlaix$genus))
+
+# Créez le graphique à barres
+bar_plotMorlaixTot <- ggplot(data.frame(Genus = names(genre_countsMorlaix), Count = as.numeric(genre_countsMorlaix)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
+  labs(title = "Genres retrouvés pour Morlaix : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = 30, y = 12, label = paste("Total de séquences :", nrow(all_filtered_dataMorlaix)), hjust = 1, vjust = 1) +
+  annotate("text", x = 30, y = Inf, label = paste("Nombre total de genres :", total_genres), hjust = 1, vjust = 0.95) # Ajouter le nombre total de genres
+
+print(bar_plotMorlaixTot)
+```
+
+
 ```{r, Représentation graphique des genres les plus retrouvés pour Verveur Eau / Sédiments / GD}
 # Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
 filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
@@ -660,11 +682,32 @@ top_genresVerveur <- head(sort(genre_countsVerveur, decreasing = TRUE), 10)
 bar_plotVerveur <- ggplot(data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
   labs(title = "Top 10 Genres les plus retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_dataVerveur)), hjust = 1, vjust = 0)
 
 print(bar_plotVerveur)
+```
+
+```{r}
+# Tableau de comptage des genres
+genre_countsVerveur <- table(all_filtered_dataVerveur$genus)
+
+# Compter le nombre total de genres
+total_genres <- length(unique(all_filtered_dataVerveur$genus))
+
+# Créez le graphique à barres
+bar_plotVerveurTot <- ggplot(data.frame(Genus = names(genre_countsVerveur), Count = as.numeric(genre_countsVerveur)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
+  labs(title = "Genres retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  annotate("text", x = 27, y = 12, label = paste("Total de séquences :", nrow(all_filtered_dataVerveur)), hjust = 1, vjust = 1) +
+  annotate("text", x = 27, y = Inf, label = paste("Nombre total de genres :", total_genres), hjust = 1, vjust = 0.95) # Ajouter le nombre total de genres
+
+print(bar_plotVerveurTot)
 ```
 
 ```{r}
@@ -713,6 +756,50 @@ bar_plot_combined2 <- ggplot(top_genres_combined2, aes(x = reorder(Genus, -Count
 
 print(bar_plot_combined2)
 ```
+
+```{r}
+# Filtrer les données pour chaque échantillon
+ME_data <- all_filtered_dataMorlaix[grep("^ME", all_filtered_dataMorlaix$qseqid), ]
+MS_data <- all_filtered_dataMorlaix[grep("^MS", all_filtered_dataMorlaix$qseqid), ]
+MG_data <- all_filtered_dataMorlaix[grep("^MG", all_filtered_dataMorlaix$qseqid), ]
+
+VE_data <- all_filtered_dataVerveur[grep("^VE", all_filtered_dataVerveur$qseqid), ]
+VS_data <- all_filtered_dataVerveur[grep("^VS", all_filtered_dataVerveur$qseqid), ]
+VG_data <- all_filtered_dataVerveur[grep("^VG", all_filtered_dataVerveur$qseqid), ]
+
+# Compter le nombre d'occurrences de chaque genre pour chaque échantillon
+genre_counts_ME <- table(ME_data$genus)
+genre_counts_MS <- table(MS_data$genus)
+genre_counts_MG <- table(MG_data$genus)
+
+genre_counts_VE <- table(VE_data$genus)
+genre_counts_VS <- table(VS_data$genus)
+genre_counts_VG <- table(VG_data$genus)
+
+# Créer une dataframe pour chaque échantillon
+heatmap_data_ME <- data.frame(genus = names(genre_counts_ME), count = as.numeric(genre_counts_ME), Condition = "MorlaixEau")
+heatmap_data_MS <- data.frame(genus = names(genre_counts_MS), count = as.numeric(genre_counts_MS), Condition = "MorlaixSedi")
+heatmap_data_MG <- data.frame(genus = names(genre_counts_MG), count = as.numeric(genre_counts_MG), Condition = "MorlaixGD")
+
+heatmap_data_VE <- data.frame(genus = names(genre_counts_VE), count = as.numeric(genre_counts_VE), Condition = "VerveurEau")
+heatmap_data_VS <- data.frame(genus = names(genre_counts_VS), count = as.numeric(genre_counts_VS), Condition = "VerveurSedi")
+heatmap_data_VG <- data.frame(genus = names(genre_counts_VG), count = as.numeric(genre_counts_VG), Condition = "VerveurGD")
+
+# Fusionner les dataframes
+heatmap_data <- rbind(heatmap_data_ME, heatmap_data_MS, heatmap_data_MG, heatmap_data_VE, heatmap_data_VS, heatmap_data_VG)
+
+# heatmap
+heatmap_plot <- ggplot(heatmap_data, aes(x = genus, y = Condition, fill = count)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(title = "Heatmap de présence des genres bactériens - Verveur et Morlaix", x = "Genre", y = "Conditions") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5))
+print(heatmap_plot)
+```
+
+
+
 
 ```{r, Uniquement pour Morlaix Eau} 
 filtered_data_MorlaixEau <- data_MorlaixEau[order(-data_MorlaixEau$pident), ]
@@ -966,6 +1053,11 @@ library(gridExtra)
 
 pdf("Figures/Figures.pdf", width = 12, height = 8)
 
+grid.arrange(heatmap_plot)
+
+grid.arrange(bar_plotMorlaixTot, bar_plotVerveurTot,
+             ncol = 2)
+
 grid.arrange(bar_plotMorlaix, bar_plotVerveur, bar_plot_combined, bar_plot_combined2,
              ncol = 2)
 
@@ -984,7 +1076,7 @@ dev.off()
 ```{r, sauvegarde des figures indiv}
 ggsave("Figures/FiguresCommun/bar_plot_combined.png", bar_plot, width = 10, height = 6, units = "in")
 ggsave("Figures/FiguresCommun/bar_plot_combined2.png", bar_plot, width = 10, height = 6, units = "in")
-
+ggsave("Figures/FiguresCommun/heatmap_plot.png", heatmap_plot, width = 10, height = 6, units = "in")
 
 ggsave("Figures/FiguresMorlaix/bar_plot_Morlaix.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
@@ -992,6 +1084,7 @@ ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixSedi.png", bar_plot_MorlaixSedi, 
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/venn_plotMorlaix.png", venn_plot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresVerveur/bar_plotMorlaixTot.png", bar_plotMorlaixTot, width = 6, height = 6, units = "in")
 
 ggsave("Figures/FiguresVerveur/bar_plotVerveur.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
@@ -999,6 +1092,7 @@ ggsave("Figures/FiguresVerveur/bar_plot_VerveurSedi.png", bar_plot_MorlaixSedi, 
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/venn_plotVerveur.png", venn_plot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresVerveur/bar_plotVerveurTot.png", bar_plotVerveurTot, width = 6, height = 6, units = "in")
 ```
 
 
