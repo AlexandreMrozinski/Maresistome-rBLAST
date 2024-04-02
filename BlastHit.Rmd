@@ -1074,8 +1074,8 @@ dev.off()
 ```
 
 ```{r, sauvegarde des figures indiv}
-ggsave("Figures/FiguresCommun/bar_plot_combined.png", bar_plot, width = 10, height = 6, units = "in")
-ggsave("Figures/FiguresCommun/bar_plot_combined2.png", bar_plot, width = 10, height = 6, units = "in")
+ggsave("Figures/FiguresCommun/bar_plot_combined.png", bar_plot_combined, width = 10, height = 6, units = "in")
+ggsave("Figures/FiguresCommun/bar_plot_combined2.png", bar_plot_combined2, width = 10, height = 6, units = "in")
 ggsave("Figures/FiguresCommun/heatmap_plot.png", heatmap_plot, width = 10, height = 6, units = "in")
 
 ggsave("Figures/FiguresMorlaix/bar_plot_Morlaix.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
@@ -1083,7 +1083,7 @@ ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixEau.png", bar_plot_MorlaixEau, wi
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
-ggsave("Figures/FiguresMorlaix/venn_plotMorlaix.png", venn_plot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresMorlaix/venn_plotMorlaix.png", venn_plotMorlaix, width = 6, height = 6, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plotMorlaixTot.png", bar_plotMorlaixTot, width = 6, height = 6, units = "in")
 
 ggsave("Figures/FiguresVerveur/bar_plotVerveur.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
@@ -1091,7 +1091,7 @@ ggsave("Figures/FiguresVerveur/bar_plot_VerveurEau.png", bar_plot_MorlaixEau, wi
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurSedi.png", bar_plot_MorlaixSedi, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
-ggsave("Figures/FiguresVerveur/venn_plotVerveur.png", venn_plot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresVerveur/venn_plotVerveur.png", venn_plotVerveur, width = 6, height = 6, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plotVerveurTot.png", bar_plotVerveurTot, width = 6, height = 6, units = "in")
 ```
 
