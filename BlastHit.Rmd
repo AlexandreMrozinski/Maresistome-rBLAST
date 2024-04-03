@@ -626,7 +626,7 @@ top_genresMorlaix <- head(sort(genre_countsMorlaix, decreasing = TRUE), 10)
 # Créez le graphique à barres
 bar_plotMorlaix <- ggplot(data.frame(Genus = names(top_genresMorlaix), Count = as.numeric(top_genresMorlaix)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   labs(title = "Top 10 Genres les plus retrouvés pour Morlaix : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_dataMorlaix)), hjust = 1, vjust = 0)
@@ -644,7 +644,7 @@ total_genres <- length(unique(all_filtered_dataMorlaix$genus))
 # Créez le graphique à barres
 bar_plotMorlaixTot <- ggplot(data.frame(Genus = names(genre_countsMorlaix), Count = as.numeric(genre_countsMorlaix)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#145C9E") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
   labs(title = "Genres retrouvés pour Morlaix : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -681,7 +681,7 @@ top_genresVerveur <- head(sort(genre_countsVerveur, decreasing = TRUE), 10)
 # Créez le graphique à barres
 bar_plotVerveur <- ggplot(data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
   labs(title = "Top 10 Genres les plus retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -700,7 +700,7 @@ total_genres <- length(unique(all_filtered_dataVerveur$genus))
 # Créez le graphique à barres
 bar_plotVerveurTot <- ggplot(data.frame(Genus = names(genre_countsVerveur), Count = as.numeric(genre_countsVerveur)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
   labs(title = "Genres retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -722,7 +722,7 @@ top_genres_combined <- aggregate(Count ~ Genus, data = top_genres_combined, sum)
 
 # Tracé du graphique
 bar_plot_combined <- ggplot(top_genres_combined, aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
   labs(title = "Top 10 Genres les plus retrouvés pour les deux sites combinés", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -750,11 +750,45 @@ bar_plot_combined2 <- ggplot(top_genres_combined2, aes(x = reorder(Genus, -Count
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
   labs(title = "Top 10 Genres les plus retrouvés pour les deux sites", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_manual(values = c("Morlaix" = "skyblue", "Verveur" = "lightgreen")) +
+  scale_fill_manual(values = c("Morlaix" = "#145C9E", "Verveur" = "#59C9A5")) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
   annotate("text", x = Inf, y = 12, label = paste("Total de séquences pour Morlaix:", sum(top_genresMorlaix), "\nTotal de séquences pour Verveur:", sum(top_genresVerveur)), hjust = 1, vjust = -0.1)
 
 print(bar_plot_combined2)
+```
+
+```{r,}
+# Création des dataframes avec une colonne "Count" pour Morlaix
+genre_countsMorlaix <- table(all_filtered_dataMorlaix$genus)
+total_sequencesMorlaix <- sum(genre_countsMorlaix)
+total_genresMorlaix <- length(unique(all_filtered_dataMorlaix$genus))
+top_genresMorlaix_df <- data.frame(Genus = names(genre_countsMorlaix), Count = as.numeric(genre_countsMorlaix))
+top_genresMorlaix_df$Ville <- "Morlaix"
+
+# Création des dataframes avec une colonne "Count" pour Verveur
+genre_countsVerveur <- table(all_filtered_dataVerveur$genus)
+total_sequencesVerveur <- sum(genre_countsVerveur)
+total_genresVerveur <- length(unique(all_filtered_dataVerveur$genus))
+top_genresVerveur_df <- data.frame(Genus = names(genre_countsVerveur), Count = as.numeric(genre_countsVerveur))
+top_genresVerveur_df$Ville <- "Verveur"
+
+# Combinaison des deux dataframes
+top_genres_combined3 <- rbind(top_genresMorlaix_df, top_genresVerveur_df)
+
+# Nombre total de genres pour les deux sites combinés
+total_genres_combined3 <- length(unique(c(all_filtered_dataMorlaix$genus, all_filtered_dataVerveur$genus)))
+
+# Tracé du graphique combiné
+bar_plot_combined3 <- ggplot(top_genres_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
+  labs(title = "Genres les plus retrouvés pour les deux sites", x = "Genre", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("Morlaix" = "#145C9E", "Verveur" = "#59C9A5")) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
+  annotate("text", x = Inf, y = 9, label = paste("Total de séquences pour Morlaix:", total_sequencesMorlaix, "\nNombre de genres pour Morlaix:", total_genresMorlaix, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de genres pour Verveur:", total_genresVerveur, "\nNombre total de genres pour les deux sites combinés:", total_genres_combined3), hjust = 1, vjust = -0.1)
+
+print(bar_plot_combined3)
 ```
 
 ```{r}
@@ -791,15 +825,22 @@ heatmap_data <- rbind(heatmap_data_ME, heatmap_data_MS, heatmap_data_MG, heatmap
 # heatmap
 heatmap_plot <- ggplot(heatmap_data, aes(x = genus, y = Condition, fill = count)) +
   geom_tile() +
+  geom_text(aes(label = count), vjust = 0.5, color = "white") +  # Ajouter le nombre de genre
   scale_fill_gradient(low = "lightblue", high = "darkblue") +
   labs(title = "Heatmap de présence des genres bactériens - Verveur et Morlaix", x = "Genre", y = "Conditions") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5))
 print(heatmap_plot)
+
 ```
+```{r}
+total_counts <- heatmap_data %>%
+  group_by(genus) %>%
+  summarise(total_count = sum(count))
 
-
-
+# Afficher le nombre total d'apparitions pour chaque genre
+print(total_counts)
+```
 
 ```{r, Uniquement pour Morlaix Eau} 
 filtered_data_MorlaixEau <- data_MorlaixEau[order(-data_MorlaixEau$pident), ]
@@ -811,7 +852,7 @@ top_genres_MorlaixEau <- head(sort(genre_counts_MorlaixEau, decreasing = TRUE), 
 
 bar_plot_MorlaixEau <- ggplot(data.frame(Genus = names(top_genres_MorlaixEau), Count = as.numeric(top_genres_MorlaixEau)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Morlaix Eau", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -831,7 +872,7 @@ top_genres_VerveurEau <- head(sort(genre_counts_VerveurEau, decreasing = TRUE), 
 
 bar_plot_VerveurEau <- ggplot(data.frame(Genus = names(top_genres_VerveurEau), Count = as.numeric(top_genres_VerveurEau)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Verveur Eau", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -851,7 +892,7 @@ top_genres_MorlaixSedi <- head(sort(genre_counts_MorlaixSedi, decreasing = TRUE)
 
 bar_plot_MorlaixSedi <- ggplot(data.frame(Genus = names(top_genres_MorlaixSedi), Count = as.numeric(top_genres_MorlaixSedi)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Morlaix Sédiments", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -870,7 +911,7 @@ top_genres_VerveurSedi <- head(sort(genre_counts_VerveurSedi, decreasing = TRUE)
 
 bar_plot_VerveurSedi <- ggplot(data.frame(Genus = names(top_genres_VerveurSedi), Count = as.numeric(top_genres_VerveurSedi)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Verveur Sédiments", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -890,7 +931,7 @@ top_genres_MorlaixGDND <- head(sort(genre_counts_MorlaixGDND, decreasing = TRUE)
 
 bar_plot_MorlaixGDND <- ggplot(data.frame(Genus = names(top_genres_MorlaixGDND), Count = as.numeric(top_genres_MorlaixGDND)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 3, 1), limits = c(0, 3)) +  # Modifier l'échelle des données y
   labs(title = "Top 10 Genres les plus retrouvés - Morlaix GDND", x = "Genre", y = "Nombre de séquences") +
@@ -910,7 +951,7 @@ top_genres_VerveurGDND <- head(sort(genre_counts_VerveurGDND, decreasing = TRUE)
 
 bar_plot_VerveurGDND <- ggplot(data.frame(Genus = names(top_genres_VerveurGDND), Count = as.numeric(top_genres_VerveurGDND)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Verveur GDND", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -929,7 +970,7 @@ top_genres_MorlaixGDDEP <- head(sort(genre_counts_MorlaixGDDEP, decreasing = TRU
 
 bar_plot_MorlaixGDDEP <- ggplot(data.frame(Genus = names(top_genres_MorlaixGDDEP), Count = as.numeric(top_genres_MorlaixGDDEP)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Morlaix GDDEP", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -948,7 +989,7 @@ top_genres_VerveurGDDEP <- head(sort(genre_counts_VerveurGDDEP, decreasing = TRU
 
 bar_plot_VerveurGDDEP <- ggplot(data.frame(Genus = names(top_genres_VerveurGDDEP), Count = as.numeric(top_genres_VerveurGDDEP)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
-  geom_bar(stat = "identity", fill = "lightgreen") +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   labs(title = "Top 10 Genres les plus retrouvés - Verveur GDDEP", x = "Genre", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
@@ -979,7 +1020,7 @@ library(ggvenn)
 venn_plotMorlaix <- ggvenn(sets_listMorlaix, show_elements = TRUE,
   show_percentage = FALSE,
   digits = 1,
-  fill_color = c("skyblue", "yellow", "green", "red"),
+  fill_color = c("#D7263D", "#F46036", "#1B998B", "#C5D86D"),
   fill_alpha = 1.5,
   stroke_color = "black",
   stroke_alpha = 1,
@@ -1023,7 +1064,7 @@ sets_listVerveur <- list(
 venn_plotVerveur <- ggvenn(sets_listVerveur , show_elements = TRUE,
   show_percentage = FALSE,
   digits = 1,
-  fill_color = c("skyblue", "yellow", "green", "red"),
+  fill_color = c("#D7263D", "#F46036", "#1B998B", "#C5D86D"),
   fill_alpha = 1.5,
   stroke_color = "black",
   stroke_alpha = 1,
@@ -1049,14 +1090,12 @@ venn_plotVerveur +
 ```
 
 ```{r}
-library(gridExtra)
-
 pdf("Figures/Figures.pdf", width = 12, height = 8)
 
 grid.arrange(heatmap_plot)
 
-grid.arrange(bar_plotMorlaixTot, bar_plotVerveurTot,
-             ncol = 2)
+grid.arrange(bar_plotMorlaixTot, bar_plotVerveurTot, bar_plot_combined3,
+             ncol = 2, nrow = 2)
 
 grid.arrange(bar_plotMorlaix, bar_plotVerveur, bar_plot_combined, bar_plot_combined2,
              ncol = 2)
@@ -1076,6 +1115,7 @@ dev.off()
 ```{r, sauvegarde des figures indiv}
 ggsave("Figures/FiguresCommun/bar_plot_combined.png", bar_plot_combined, width = 10, height = 6, units = "in")
 ggsave("Figures/FiguresCommun/bar_plot_combined2.png", bar_plot_combined2, width = 10, height = 6, units = "in")
+ggsave("Figures/FiguresCommun/bar_plot_combined3.png", bar_plot_combined3, width = 10, height = 6, units = "in")
 ggsave("Figures/FiguresCommun/heatmap_plot.png", heatmap_plot, width = 10, height = 6, units = "in")
 
 ggsave("Figures/FiguresMorlaix/bar_plot_Morlaix.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
@@ -1084,7 +1124,7 @@ ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixSedi.png", bar_plot_MorlaixSedi, 
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDND.png", bar_plot_MorlaixGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/bar_plot_MorlaixGDDEP.png", bar_plot_MorlaixGDDEP, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresMorlaix/venn_plotMorlaix.png", venn_plotMorlaix, width = 6, height = 6, units = "in")
-ggsave("Figures/FiguresVerveur/bar_plotMorlaixTot.png", bar_plotMorlaixTot, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresMorlaix/bar_plotMorlaixTot.png", bar_plotMorlaixTot, width = 6, height = 6, units = "in")
 
 ggsave("Figures/FiguresVerveur/bar_plotVerveur.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurEau.png", bar_plot_MorlaixEau, width = 6, height = 4, units = "in")
