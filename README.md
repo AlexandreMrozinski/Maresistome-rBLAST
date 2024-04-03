@@ -8,7 +8,7 @@ Link : https://www-iuem.univ-brest.fr/lemar/projets-scientifiques/201377/
 |:----|:----|
 | **Name:** | **Pr. Michèle Gourmelon** |
 | **Position:** | Researcher |
-| **Organization:** | Ifrmer DYNECO Pelagos, Plouzané, France |
+| **Organization:** | Ifremer DYNECO Pelagos, Plouzané, France |
 | **E-mail:** | <a href="mailto:Michele.Gourmelon@ifremer.fr">Michele.Gourmelon@ifremer.fr</a> |
 
 |     |     |
