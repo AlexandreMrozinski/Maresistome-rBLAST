@@ -107,7 +107,7 @@ cl_VerveurGDND <- predict(bl, dna_VerveurGDND, custom_format = fmt)
 cl_VerveurGDDEP <- predict(bl, dna_VerveurGDDEP, custom_format = fmt)
 
 cl_MorlaixEau[1:5,]
-#to view first 5 hits
+#affiche les premiers 5 hits
 summary(cl_MorlaixEau)
 cl_MorlaixSedi[1:5,]
 summary(cl_MorlaixSedi)
@@ -825,9 +825,9 @@ heatmap_data <- rbind(heatmap_data_ME, heatmap_data_MS, heatmap_data_MG, heatmap
 # heatmap
 heatmap_plot <- ggplot(heatmap_data, aes(x = genus, y = Condition, fill = count)) +
   geom_tile() +
-  geom_text(aes(label = count), vjust = 0.5, color = "white") +  # Ajouter le nombre de genre
+  geom_text(aes(label = count), vjust = 0.5, color = "white") +  
   scale_fill_gradient(low = "lightblue", high = "darkblue") +
-  labs(title = "Heatmap de présence des genres bactériens - Verveur et Morlaix", x = "Genre", y = "Conditions") +
+  labs(title = "Heatmap de présence des genres bactériens - Verveur et Barnenez", x = "Genre", y = "Conditions") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5))
 print(heatmap_plot)
