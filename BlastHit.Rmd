@@ -55,7 +55,7 @@ library('rBLAST')
 library(reshape2)
 ```
 
-```{r, eval=FALSE, créer la data base, prévoire 2-3 et 80go de stockage, NE LANCER qu'une fois}
+```{r, eval=FALSE, créer la data base, prévoire 2-3h et 80go de stockage, NE LANCER qu'une fois}
 libdir='data'
 dir.create(libdir)
 setwd(libdir)
@@ -782,7 +782,7 @@ total_genres_combined3 <- length(unique(c(all_filtered_dataBarnenez$genus, all_f
 bar_plot_combined3 <- ggplot(top_genres_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Genres les plus retrouvés pour les deux sites", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "Genres les plus retrouvés pour les deux sites", x = "Genres", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
@@ -822,14 +822,12 @@ heatmap_data_genus <- rbind(heatmap_datagenus_BarnenezGDND, heatmap_datagenus_Ba
 heatmap_plot_genus <- ggplot(heatmap_data_genus, aes(x = genus, y = Condition, fill = count)) +
   geom_tile() +
   geom_text(aes(label = count), vjust = 0.5, color = "white") +  
-  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  scale_fill_gradient(low = "skyblue", high = "darkblue") +
   labs(title = "Heatmap de présence des genres bactériens - Verveur et Barnenez", x = "Genre", y = "Conditions") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5))
 print(heatmap_plot_genus)
 ```
-
-
 
 
 ```{r}
@@ -862,12 +860,13 @@ heatmap_data_class <- rbind(heatmap_dataclass_BarnenezGDND, heatmap_dataclass_Ba
 heatmap_plot_class <- ggplot(heatmap_data_class, aes(x = class, y = Condition, fill = count)) +
   geom_tile() +
   geom_text(aes(label = count), vjust = 0.5, color = "white") +  
-  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  scale_fill_gradient(low = "skyblue", high = "darkblue") +
   labs(title = "Heatmap de présence des classes bactériens - Verveur et Barnenez", x = "Classes", y = "Conditions") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5))
 print(heatmap_plot_class)
 ```
+
 
 ```{r, Uniquement pour Barnenez Eau} 
 genre_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
@@ -1006,19 +1005,17 @@ sets_listBarnenez <- list(
   BarnenezGDDEP = genres_BarnenezGDDEP
 )
 
-library(ggvenn)
-# Créer un diagramme de Venn avec ggvenn
 venn_plotBarnenez <- ggvenn(sets_listBarnenez, show_elements = TRUE,
   show_percentage = FALSE,
   digits = 1,
-  fill_color = c("#D7263D", "#F46036", "#1B998B", "#C5D86D"),
+  fill_color = c("skyblue", "orange2", "#1B998B", "#C5D86D"),
   fill_alpha = 1.5,
   stroke_color = "black",
   stroke_alpha = 1,
-  stroke_size = 1,
-  stroke_linetype = "solid",
+  stroke_size = 0.1,
+  stroke_linetype = "solid", 
   set_name_color = "black",
-  set_name_size = 3,  # Ajustez la taille de la police ici BarnenezSedi BarnenezEau BarnenezGD..
+  set_name_size = 2,  # Ajustez la taille de la police ici BarnenezSedi BarnenezEau BarnenezGD..
   text_size = 2,  # Ajustez la taille de la police pour les genres
   label_sep = "
   ",
@@ -1055,14 +1052,14 @@ sets_listVerveur <- list(
 venn_plotVerveur <- ggvenn(sets_listVerveur , show_elements = TRUE,
   show_percentage = FALSE,
   digits = 1,
-  fill_color = c("#D7263D", "#F46036", "#1B998B", "#C5D86D"),
+  fill_color = c("skyblue", "orange2", "#1B998B", "#C5D86D"),
   fill_alpha = 1.5,
   stroke_color = "black",
   stroke_alpha = 1,
-  stroke_size = 1,
+  stroke_size = 0.1,
   stroke_linetype = "solid",
   set_name_color = "black",
-  set_name_size = 3,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
+  set_name_size = 2,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
   text_size = 2,  # Ajustez la taille de la police pour les genres
   label_sep = "
   ",
@@ -1123,7 +1120,7 @@ ggsave("Figures/FiguresCommun/heatmap_plot_genus.png", heatmap_plot_genus, width
 ggsave("Figures/FiguresBarnenez/bar_plot_BarnenezEau.png", bar_plot_BarnenezEau, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresBarnenez/bar_plot_BarnenezSedi.png", bar_plot_BarnenezSedi, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresBarnenez/bar_plot_BarnenezGDND.png", bar_plot_BarnenezGDND, width = 6, height = 4, units = "in")
-ggsave("Figures/FiguresBarnenez/bar_plot_BarnenezGDDEP.png", bar_plot_BarnenezGDDEP, width = 6, height = 4, units = "in")
+ggsave("Figures/FiguresBarnenez/bar_plot_BarnenezGDDEP.png", bar_plot_BarnenezGDDEP)
 ggsave("Figures/FiguresBarnenez/venn_plotBarnenez.png", venn_plotBarnenez, width = 6, height = 6, units = "in")
 ggsave("Figures/FiguresBarnenez/bar_plotBarnenezTot.png", bar_plotBarnenezTot, width = 6, height = 6, units = "in")
 
@@ -1131,7 +1128,7 @@ ggsave("Figures/FiguresVerveur/bar_plot_VerveurEau.png", bar_plot_BarnenezEau, w
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurSedi.png", bar_plot_BarnenezSedi, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDND.png", bar_plot_BarnenezGDND, width = 6, height = 4, units = "in")
 ggsave("Figures/FiguresVerveur/bar_plot_VerveurGDDEP.png", bar_plot_BarnenezGDDEP, width = 6, height = 4, units = "in")
-ggsave("Figures/FiguresVerveur/venn_plotVerveur.png", venn_plotVerveur, width = 6, height = 6, units = "in")
+ggsave("Figures/FiguresVerveur/venn_plotVerveur.png", venn_plotVerveur)
 ggsave("Figures/FiguresVerveur/bar_plotVerveurTot.png", bar_plotVerveurTot, width = 6, height = 6, units = "in")
 ```
 

@@ -1,0 +1,223 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(ggplot2)
+```
+
+```{r}
+dnbecoli<-read.csv2("Dnbecoli.csv")
+# Convertir les variables en facteurs avec des niveaux spécifiques
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$condition <- factor(dnbecoli$condition, levels = c("ND", "D"))
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Fevrier", "Mars", "Avril", "Mai", "Juin"))
+
+
+# Créer le graphique avec les barres d'histogramme et les barres d'erreur
+graphique <- ggplot(dnbecoli, aes(x = mois, y = Ecoli, fill = condition)) +
+  coord_cartesian(ylim = c(0, max(dnbecoli$Ecoli) * 1.1)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, position = position_dodge(1)) +  # Ajout des barres d'erreur
+  facet_grid(.~Site) +
+  labs(title = "Suivi de la contamination en E. coli des palourdes du Verveur et Barnenez sur 5 mois", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  theme_gray()
+
+# Afficher le graphique
+print(graphique)
+```
+```{r}
+library(ggplot2)
+
+# Charger les données
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+# Convertir les variables en facteurs avec des niveaux spécifiques
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$condition <- factor(dnbecoli$condition, levels = c("ND", "D"))
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier","Fevrier", "Mars", "Avril", "Mai", "Juin"))
+
+# Fusionner les données de 2023 et 2024 pour chaque site
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Créer le graphique pour Verveur
+graphique_verveur <- ggplot(subset(dnbecoli_combined, Site == "Verveur"), 
+                            aes(x = mois, y = Ecoli, fill = condition)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black") +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +  
+  labs(title = "Suivi de la contamination en E. coli des palourdes du Verveur (2023 et 2024)", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  theme_gray()
+
+# Créer le graphique pour Barnenez
+graphique_barnenez <- ggplot(subset(dnbecoli_combined, Site == "Barnenez"), 
+                             aes(x = mois, y = Ecoli, fill = condition)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black") +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +  
+  labs(title = "Suivi de la contamination en E. coli des palourdes de Barnenez (2023 et 2024)", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  theme_gray()
+
+# Afficher les graphiques
+print(graphique_verveur)
+print(graphique_barnenez)
+
+
+
+```
+
+
+
+```{r}
+library(ggplot2)
+
+# Charger les données
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+# Convertir les variables en facteurs avec des niveaux spécifiques
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$condition <- factor(dnbecoli$condition, levels = c("ND", "D"))
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin"))
+
+# Fusionner les données de 2023 et 2024 pour chaque site
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Créer le graphique pour Verveur
+graphique_verveur <- ggplot(subset(dnbecoli_combined, Site == "Verveur"), 
+                            aes(x = mois, y = Ecoli, fill = condition)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black") +
+  coord_cartesian(ylim = c(0, max(10))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_hline(yintercept = c(2.3, 3.6), linetype = "solid", size = 1, color = c("green", "red")) +
+  labs(title = "Suivi de la contamination en E. coli des palourdes du Verveur (2023 et 2024)", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  theme_gray()
+
+# Créer le graphique pour Barnenez
+graphique_barnenez <- ggplot(subset(dnbecoli_combined, Site == "Barnenez"), 
+                             aes(x = mois, y = Ecoli, fill = condition)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), color = "black") +
+  coord_cartesian(ylim = c(0, max(10))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_hline(yintercept = c(2.3, 3.6), linetype = "solid", size = 1, color = c("green", "red")) +
+  labs(title = "Suivi de la contamination en E. coli des palourdes de Barnenez (2023 et 2024)", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  theme_gray()
+
+# Afficher les graphiques
+print(graphique_verveur)
+print(graphique_barnenez)
+
+
+```
+
+
+```{r}
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$condition <- factor(dnbecoli$condition, levels = c("ND", "D"))
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin"))
+
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+
+graphique_combined <- ggplot(dnbecoli_combined, aes(x = mois, y = Ecoli, fill = condition)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(6))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_gray() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+print(graphique_combined)
+```
+```{r}
+ggsave("Figures/graphique_combined.png", graphique_combined, width = 10, height = 6, units = "in")
+```
+
+
+```{r}
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$condition <- factor(dnbecoli$condition, levels = c("ND", "D"))
+
+# Réorganiser les niveaux du facteur 'mois' pour garantir l'ordre chronologique
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+graphique_combined <- ggplot(dnbecoli_combined, aes(x = mois, y = Ecoli, fill = condition)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(6))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_gray() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(graphique_combined)
+
+```
+
+
