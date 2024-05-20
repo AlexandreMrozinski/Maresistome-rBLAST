@@ -53,6 +53,9 @@ library(ape)
 library(taxonomizr)
 library('rBLAST')
 library(reshape2)
+library(ggvenn)
+library(cowplot)
+library(patchwork)
 ```
 
 ```{r, eval=FALSE, créer la data base, prévoire 2-3h et 80go de stockage, NE LANCER qu'une fois}
@@ -600,7 +603,7 @@ write.xlsx(list(data_VerveurGDND = data_VerveurGDND,
 
 #Représentations Graphique
 
-```{r, Représentation graphique des genres les plus retrouvés pour Barnenez Eau / Sédiments / GD}
+```{r, Représentation graphique des classs les plus retrouvés pour Barnenez Eau / Sédiments / GD}
 # Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
 filtered_data_BarnenezEau <- data_BarnenezEau[order(-data_BarnenezEau$pident), ]
 filtered_data_BarnenezEau <- filtered_data_BarnenezEau[!duplicated(filtered_data_BarnenezEau$qseqid), ]
@@ -617,17 +620,17 @@ filtered_data_BarnenezGDDEP <- filtered_data_BarnenezGDDEP[!duplicated(filtered_
 # Combinez les données filtrées en une seule dataframe
 all_filtered_dataBarnenez <- rbind(filtered_data_BarnenezEau, filtered_data_BarnenezSedi, filtered_data_BarnenezGDND, filtered_data_BarnenezGDDEP)
 
-# Tableau de comptage des genres
-genre_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
+# Tableau de comptage des classs
+class_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
 
-# Sélectionnez les 10 genres les plus retrouvés
-top_genresBarnenez <- head(sort(genre_countsBarnenez, decreasing = TRUE), 10)
+# Sélectionnez les 10 classs les plus retrouvés
+top_classsBarnenez <- head(sort(class_countsBarnenez, decreasing = TRUE), 10)
 
 # Créez le graphique à barres
-bar_plotBarnenez <- ggplot(data.frame(Genus = names(top_genresBarnenez), Count = as.numeric(top_genresBarnenez)), 
+bar_plotBarnenez <- ggplot(data.frame(Genus = names(top_classsBarnenez), Count = as.numeric(top_classsBarnenez)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
-  labs(title = "Top 10 Genres les plus retrouvés pour Barnenez : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "Top 10 classs les plus retrouvés pour Barnenez : Eau / Sédiments / GD (DEP et ND)", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_dataBarnenez)), hjust = 1, vjust = 0)
 
@@ -635,27 +638,27 @@ print(bar_plotBarnenez)
 ```
 
 ```{r}
-# Tableau de comptage des genres
-genre_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
+# Tableau de comptage des classs
+class_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
 
-# Compter le nombre total de genres
-total_genres <- length(unique(all_filtered_dataBarnenez$genus))
+# Compter le nombre total de classs
+total_classs <- length(unique(all_filtered_dataBarnenez$genus))
 
 # Créez le graphique à barres
-bar_plotBarnenezTot <- ggplot(data.frame(Genus = names(genre_countsBarnenez), Count = as.numeric(genre_countsBarnenez)), 
+bar_plotBarnenezTot <- ggplot(data.frame(Genus = names(class_countsBarnenez), Count = as.numeric(class_countsBarnenez)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#145C9E") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Genres retrouvés pour Barnenez : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés pour Barnenez : Eau / Sédiments / GD (DEP et ND)", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = 30, y = 12, label = paste("Total de séquences :", nrow(all_filtered_dataBarnenez)), hjust = 1, vjust = 1) +
-  annotate("text", x = 30, y = Inf, label = paste("Nombre total de genres :", total_genres), hjust = 1, vjust = 0.95) # Ajouter le nombre total de genres
+  annotate("text", x = 30, y = Inf, label = paste("Nombre total de classs :", total_classs), hjust = 1, vjust = 0.95) # Ajouter le nombre total de classs
 
 print(bar_plotBarnenezTot)
 ```
 
 
-```{r, Représentation graphique des genres les plus retrouvés pour Verveur Eau / Sédiments / GD}
+```{r, Représentation graphique des classs les plus retrouvés pour Verveur Eau / Sédiments / GD}
 # Filtrer pour ne conserver que le résultat avec le plus grand pident par fichier .fa
 filtered_data_VerveurEau <- data_VerveurEau[order(-data_VerveurEau$pident), ]
 filtered_data_VerveurEau <- filtered_data_VerveurEau[!duplicated(filtered_data_VerveurEau$qseqid), ]
@@ -672,18 +675,18 @@ filtered_data_VerveurGDDEP <- filtered_data_VerveurGDDEP[!duplicated(filtered_da
 # Combinez les données filtrées en une seule dataframe
 all_filtered_dataVerveur <- rbind(filtered_data_VerveurEau, filtered_data_VerveurSedi, filtered_data_VerveurGDND, filtered_data_VerveurGDDEP)
 
-# Tableau de comptage des genres
-genre_countsVerveur <- table(all_filtered_dataVerveur$genus)
+# Tableau de comptage des classs
+class_countsVerveur <- table(all_filtered_dataVerveur$genus)
 
-# Sélectionnez les 10 genres les plus retrouvés
-top_genresVerveur <- head(sort(genre_countsVerveur, decreasing = TRUE), 10)
+# Sélectionnez les 10 classs les plus retrouvés
+top_classsVerveur <- head(sort(class_countsVerveur, decreasing = TRUE), 10)
 
 # Créez le graphique à barres
-bar_plotVerveur <- ggplot(data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur)), 
+bar_plotVerveur <- ggplot(data.frame(Genus = names(top_classsVerveur), Count = as.numeric(top_classsVerveur)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Top 10 Genres les plus retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "Top 10 classs les plus retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(all_filtered_dataVerveur)), hjust = 1, vjust = 0)
 
@@ -691,129 +694,233 @@ print(bar_plotVerveur)
 ```
 
 ```{r}
-# Tableau de comptage des genres
-genre_countsVerveur <- table(all_filtered_dataVerveur$genus)
+# Tableau de comptage des classs
+class_countsVerveur <- table(all_filtered_dataVerveur$genus)
 
-# Compter le nombre total de genres
-total_genres <- length(unique(all_filtered_dataVerveur$genus))
+# Compter le nombre total de classs
+total_classs <- length(unique(all_filtered_dataVerveur$genus))
 
 # Créez le graphique à barres
-bar_plotVerveurTot <- ggplot(data.frame(Genus = names(genre_countsVerveur), Count = as.numeric(genre_countsVerveur)), 
+bar_plotVerveurTot <- ggplot(data.frame(Genus = names(class_countsVerveur), Count = as.numeric(class_countsVerveur)), 
                    aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Genres retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés pour Verveur : Eau / Sédiments / GD (DEP et ND)", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = 27, y = 12, label = paste("Total de séquences :", nrow(all_filtered_dataVerveur)), hjust = 1, vjust = 1) +
-  annotate("text", x = 27, y = Inf, label = paste("Nombre total de genres :", total_genres), hjust = 1, vjust = 0.95) # Ajouter le nombre total de genres
+  annotate("text", x = 27, y = Inf, label = paste("Nombre total de classs :", total_classs), hjust = 1, vjust = 0.95) # Ajouter le nombre total de classs
 
 print(bar_plotVerveurTot)
 ```
 
 ```{r}
 # Combinaison des données pour les deux villes
-top_genres_combined <- rbind(
-  data.frame(Genus = names(top_genresBarnenez), Count = as.numeric(top_genresBarnenez)),
-  data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur))
+top_classs_combined <- rbind(
+  data.frame(Genus = names(top_classsBarnenez), Count = as.numeric(top_classsBarnenez)),
+  data.frame(Genus = names(top_classsVerveur), Count = as.numeric(top_classsVerveur))
 )
 
-# Agrégation des comptes pour chaque genre
-top_genres_combined <- aggregate(Count ~ Genus, data = top_genres_combined, sum)
+# Agrégation des comptes pour chaque class
+top_classs_combined <- aggregate(Count ~ Genus, data = top_classs_combined, sum)
 
 # Tracé du graphique
-bar_plot_combined <- ggplot(top_genres_combined, aes(x = reorder(Genus, -Count), y = Count)) +
+bar_plot_combined <- ggplot(top_classs_combined, aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Top 10 Genres les plus retrouvés pour les deux sites combinés", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "Top 10 classs les plus retrouvés pour les deux sites combinés", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 20, 1), limits = c(0, 20)) +  # Modifier l'échelle des données y
-  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", sum(top_genres_combined$Count)), hjust = 1, vjust = 0)
+  annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", sum(top_classs_combined$Count)), hjust = 1, vjust = 0)
 
 print(bar_plot_combined)
 ```
 
-```{r, Représentation graphique des genres les plus retrouvés pour Verveur et Barnenez Eau / Sédiments / GD}
+```{r, Représentation graphique des classs les plus retrouvés pour Verveur et Barnenez Eau / Sédiments / GD}
 # Création des dataframes avec une colonne "Count"
-top_genresBarnenez_df <- data.frame(Genus = names(top_genresBarnenez), Count = as.numeric(top_genresBarnenez))
-top_genresVerveur_df <- data.frame(Genus = names(top_genresVerveur), Count = as.numeric(top_genresVerveur))
+top_classsBarnenez_df <- data.frame(Genus = names(top_classsBarnenez), Count = as.numeric(top_classsBarnenez))
+top_classsVerveur_df <- data.frame(Genus = names(top_classsVerveur), Count = as.numeric(top_classsVerveur))
 
 # Ajout d'une colonne "Ville" pour chaque dataframe
-top_genresBarnenez_df$Ville <- "Barnenez"
-top_genresVerveur_df$Ville <- "Verveur"
+top_classsBarnenez_df$Ville <- "Barnenez"
+top_classsVerveur_df$Ville <- "Verveur"
 
 # Combinaison des deux dataframes
-top_genres_combined2 <- rbind(top_genresBarnenez_df, top_genresVerveur_df)
+top_classs_combined2 <- rbind(top_classsBarnenez_df, top_classsVerveur_df)
 
 # Tracé du graphique combiné
-bar_plot_combined2 <- ggplot(top_genres_combined2, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+bar_plot_combined2 <- ggplot(top_classs_combined2, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Top 10 Genres les plus retrouvés pour les deux sites", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "Top 10 classs les plus retrouvés pour les deux sites", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
-  annotate("text", x = Inf, y = 12, label = paste("Total de séquences pour Barnenez:", sum(top_genresBarnenez), "\nTotal de séquences pour Verveur:", sum(top_genresVerveur)), hjust = 1, vjust = -0.1)
+  annotate("text", x = Inf, y = 12, label = paste("Total de séquences pour Barnenez:", sum(top_classsBarnenez), "\nTotal de séquences pour Verveur:", sum(top_classsVerveur)), hjust = 1, vjust = -0.1)
 
 print(bar_plot_combined2)
 ```
 
 ```{r,}
 # Création des dataframes avec une colonne "Count" pour Barnenez
-genre_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
-total_sequencesBarnenez <- sum(genre_countsBarnenez)
-total_genresBarnenez <- length(unique(all_filtered_dataBarnenez$genus))
-top_genresBarnenez_df <- data.frame(Genus = names(genre_countsBarnenez), Count = as.numeric(genre_countsBarnenez))
-top_genresBarnenez_df$Ville <- "Barnenez"
+class_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
+total_sequencesBarnenez <- sum(class_countsBarnenez)
+total_classsBarnenez <- length(unique(all_filtered_dataBarnenez$genus))
+top_classsBarnenez_df <- data.frame(Genus = names(class_countsBarnenez), Count = as.numeric(class_countsBarnenez))
+top_classsBarnenez_df$Ville <- "Barnenez"
 
 # Création des dataframes avec une colonne "Count" pour Verveur
-genre_countsVerveur <- table(all_filtered_dataVerveur$genus)
-total_sequencesVerveur <- sum(genre_countsVerveur)
-total_genresVerveur <- length(unique(all_filtered_dataVerveur$genus))
-top_genresVerveur_df <- data.frame(Genus = names(genre_countsVerveur), Count = as.numeric(genre_countsVerveur))
-top_genresVerveur_df$Ville <- "Verveur"
+class_countsVerveur <- table(all_filtered_dataVerveur$genus)
+total_sequencesVerveur <- sum(class_countsVerveur)
+total_classsVerveur <- length(unique(all_filtered_dataVerveur$genus))
+top_classsVerveur_df <- data.frame(Genus = names(class_countsVerveur), Count = as.numeric(class_countsVerveur))
+top_classsVerveur_df$Ville <- "Verveur"
 
 # Combinaison des deux dataframes
-top_genres_combined3 <- rbind(top_genresBarnenez_df, top_genresVerveur_df)
+top_classs_combined3 <- rbind(top_classsBarnenez_df, top_classsVerveur_df)
 
-# Nombre total de genres pour les deux sites combinés
-total_genres_combined3 <- length(unique(c(all_filtered_dataBarnenez$genus, all_filtered_dataVerveur$genus)))
+# Nombre total de classs pour les deux sites combinés
+total_classs_combined3 <- length(unique(c(all_filtered_dataBarnenez$genus, all_filtered_dataVerveur$genus)))
 
 # Tracé du graphique combiné
-bar_plot_combined3 <- ggplot(top_genres_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+bar_plot_combined3 <- ggplot(top_classs_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
-  labs(title = "Genres les plus retrouvés pour les deux sites", x = "Genres", y = "Nombre de séquences") +
+  labs(title = "classs les plus retrouvés pour les deux sites", x = "classs", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
-  annotate("text", x = Inf, y = 9, label = paste("Total de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de genres pour Barnenez:", total_genresBarnenez, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de genres pour Verveur:", total_genresVerveur, "\nNombre total de genres pour les deux sites combinés:", total_genres_combined3), hjust = 1, vjust = -0.1)
+  annotate("text", x = Inf, y = 9, label = paste("Total de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de classs pour Barnenez:", total_classsBarnenez, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de classs pour Verveur:", total_classsVerveur, "\nNombre total de classs pour les deux sites combinés:", total_classs_combined3), hjust = 1, vjust = -0.1)
+
+print(bar_plot_combined3)
+```
+
+```{r}
+# Réinitialiser les variables
+legend_text <- ""
+legend_title <- ""
+```
+
+```{r}
+
+
+genus <- c("Bacillus", "Microbacterium", "Salinibacterium", "Sanguibacter", "Demequina", 
+           "Plantibacter", "Paracoccus", "Pseudovibrio", "Vibrio", "Yoonia", 
+           "Pseudorhodobacter", "Pseudosulfitobacter", "Pseudalkalibacillus", 
+           "Metabacillus", "Niallia", "Cytobacillus", "Peribacillus", "Carnobacterium", 
+           "Hydrogenophaga", "Algoriphagus", "Nonlabens", "Tenacibaculum", 
+           "Polaribacter", "Winogradskyella", "Zobellia", "Cellulophaga", 
+           "Olleya", "Formosa", "Flavobacterium", "Cobetia", "Pseudoalteromonas", 
+           "Shewanella", "Paraglaciecola", "Rahnella", "Pseudocolwellia", 
+           "Psychromonas", "Pseudomonas", "Rheinheimera", "Stenotrophomonas", 
+           "Aliiglaciecola", "Marinagarivorans", "Cellvibrio", "Motilimonas", "Pedobacter")
+
+class <- c("Bacilli", "Actinomycetes", "Actinomycetes", "Actinomycetes", "Actinomycetes", 
+           "Actinomycetes", "Alphaproteobacteria", "Alphaproteobacteria", "Alphaproteobacteria", 
+           "Alphaproteobacteria", "Alphaproteobacteria", "Alphaproteobacteria", "Bacilli", 
+           "Bacilli", "Bacilli", "Bacilli", "Bacilli", "Bacilli", "Betaproteobacteria", 
+           "Cytophagia", "Flavobacteriia", "Flavobacteriia", "Flavobacteriia", "Flavobacteriia", 
+           "Flavobacteriia", "Flavobacteriia", "Flavobacteriia", "Flavobacteriia", 
+           "Flavobacteriia", "Gammaproteobacteria", "Gammaproteobacteria", "Gammaproteobacteria", 
+           "Gammaproteobacteria", "Gammaproteobacteria", "Gammaproteobacteria", "Gammaproteobacteria", 
+           "Gammaproteobacteria", "Gammaproteobacteria", "Gammaproteobacteria", "Gammaproteobacteria", 
+           "Gammaproteobacteria", "Gammaproteobacteria", "Gammaproteobacteria", "Sphingobacteriia")
+bacteria_db <- data.frame(genus, class)
+
+# Définir la correspondance entre les classes et les symboles
+class_symbols <- c("Bacilli" = "★", "Actinomycetes" = "○", "Alphaproteobacteria" = "□", 
+                   "Betaproteobacteria" = "◇", "Cytophagia" = "△", "Flavobacteriia" = "▲", 
+                   "Gammaproteobacteria" = "■", "Sphingobacteriia" = "●")
+
+# Ajouter une colonne de symboles au data frame
+bacteria_db$symbol <- class_symbols[bacteria_db$class]
+
+# Création des dataframes avec une colonne "Count" pour Barnenez
+class_countsBarnenez <- table(all_filtered_dataBarnenez$genus)
+total_sequencesBarnenez <- sum(class_countsBarnenez)
+total_classsBarnenez <- length(unique(all_filtered_dataBarnenez$genus))
+top_classsBarnenez_df <- data.frame(Genus = names(class_countsBarnenez), Count = as.numeric(class_countsBarnenez))
+top_classsBarnenez_df$Ville <- "Barnenez"
+
+# Création des dataframes avec une colonne "Count" pour Verveur
+class_countsVerveur <- table(all_filtered_dataVerveur$genus)
+total_sequencesVerveur <- sum(class_countsVerveur)
+total_classsVerveur <- length(unique(all_filtered_dataVerveur$genus))
+top_classsVerveur_df <- data.frame(Genus = names(class_countsVerveur), Count = as.numeric(class_countsVerveur))
+top_classsVerveur_df$Ville <- "Verveur"
+
+# Combinaison des deux dataframes
+top_classs_combined3 <- rbind(top_classsBarnenez_df, top_classsVerveur_df)
+
+# Ajouter la colonne "Class" et "symbol" en fusionnant avec le data frame bacteria_db
+top_classs_combined3 <- merge(top_classs_combined3, bacteria_db, by.x = "Genus", by.y = "genus", all.x = TRUE)
+
+# Ajouter une colonne pour savoir si le genre a déjà été rencontré et calculer la position des labels
+top_classs_combined3 <- top_classs_combined3[order(top_classs_combined3$Genus, top_classs_combined3$Ville), ]
+top_classs_combined3$duplicated_genus <- duplicated(top_classs_combined3$Genus) | duplicated(top_classs_combined3$Genus, fromLast = TRUE)
+
+# Ajouter une colonne max_count pour la hauteur maximale de la barre pour chaque genre
+top_classs_combined3 <- top_classs_combined3 %>%
+  group_by(Genus) %>%
+  mutate(max_count = max(Count)) %>%
+  ungroup()
+
+# Déterminer la position des labels (centre ou côté)
+top_classs_combined3$Label <- ifelse(top_classs_combined3$duplicated_genus, "", top_classs_combined3$symbol)
+top_classs_combined3$symbol_y_pos <- ifelse(top_classs_combined3$duplicated_genus, top_classs_combined3$max_count, top_classs_combined3$Count)
+
+# Nombre total de classes pour les deux sites combinés
+total_classs_combined3 <- length(unique(c(all_filtered_dataBarnenez$genus, all_filtered_dataVerveur$genus)))
+
+# Tracé du graphique combiné
+bar_plot_combined3 <- ggplot(top_classs_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(data = subset(top_classs_combined3, duplicated_genus == FALSE), aes(label = Label), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 9) +  # Ajouter les symboles sur le côté
+  geom_text(data = subset(top_classs_combined3, duplicated_genus == TRUE), aes(label = symbol, x = Genus, y = symbol_y_pos + 0.5), color = "black", size = 9) +  # Ajouter les symboles au centre au-dessus de la barre la plus haute
+  labs(title = "Genres retrouvés pour le site de Verveur et Barnenez", x = "Genres", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) +
+  scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  # Modifier l'échelle des données y
+  annotate("text", x = 38, y = 12, label = paste("Total de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de séquences pour Barnenez:", total_classsBarnenez, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de classes pour Verveur:", total_classsVerveur, "\nNombre total de genres pour les deux sites combinés:", total_classs_combined3), hjust = 1, vjust = -0.1, size = 5) +
+  theme(legend.position = "right") + 
+  guides(fill = guide_legend(title = "Ville"))
+
+legend_text <- paste(names(class_symbols), class_symbols, sep = ": ")
+legend_text <- paste(legend_text, collapse = "\n")
+legend_title <- "Classes bactérienne :"
+# Concaténer les textes avec le titre de la légende
+legend_text <- paste(legend_title, "\n", legend_text)
+bar_plot_combined3 <- bar_plot_combined3 + 
+  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 5, color = "black", parse = FALSE)
 
 print(bar_plot_combined3)
 ```
 
 
-```{r}
-# Compter le nombre d'occurrences de chaque genre pour chaque échantillon
-genre_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$genus)
-genre_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$genus)
-genre_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
-genre_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$genus)
 
-genre_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
-genre_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
-genre_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
-genre_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
+
+
+```{r}
+# Compter le nombre d'occurrences de chaque genus pour chaque échantillon
+genus_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$genus)
+genus_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$genus)
+genus_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
+genus_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$genus)
+
+genus_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
+genus_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
+genus_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
+genus_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
 
 # Créer une dataframe pour chaque échantillon
-heatmap_datagenus_BarnenezGDND <- data.frame(genus = names(genre_counts_BarnenezGDND), count = as.numeric(genre_counts_BarnenezGDND), Condition = "BarnenezGDND")
-heatmap_datagenus_BarnenezGDDEP <- data.frame(genus = names(genre_counts_BarnenezGDDEP), count = as.numeric(genre_counts_BarnenezGDDEP), Condition = "BarnenezGDDEP")
-heatmap_datagenus_BarnenezEau <- data.frame(genus = names(genre_counts_BarnenezEau), count = as.numeric(genre_counts_BarnenezEau), Condition = "BarnenezEau")
-heatmap_datagenus_BarnenezSedi <- data.frame(genus = names(genre_counts_BarnenezSedi), count = as.numeric(genre_counts_BarnenezSedi), Condition = "BarnenezSedi")
+heatmap_datagenus_BarnenezGDND <- data.frame(genus = names(genus_counts_BarnenezGDND), count = as.numeric(genus_counts_BarnenezGDND), Condition = "BarnenezGDND")
+heatmap_datagenus_BarnenezGDDEP <- data.frame(genus = names(genus_counts_BarnenezGDDEP), count = as.numeric(genus_counts_BarnenezGDDEP), Condition = "BarnenezGDDEP")
+heatmap_datagenus_BarnenezEau <- data.frame(genus = names(genus_counts_BarnenezEau), count = as.numeric(genus_counts_BarnenezEau), Condition = "BarnenezEau")
+heatmap_datagenus_BarnenezSedi <- data.frame(genus = names(genus_counts_BarnenezSedi), count = as.numeric(genus_counts_BarnenezSedi), Condition = "BarnenezSedi")
 
-heatmap_datagenus_VerveurGDND <- data.frame(genus = names(genre_counts_VerveurGDND), count = as.numeric(genre_counts_VerveurGDND), Condition = "VerveurGDND")
-heatmap_datagenus_VerveurGDDEP <- data.frame(genus = names(genre_counts_VerveurGDDEP), count = as.numeric(genre_counts_VerveurGDDEP), Condition = "VerveurGDDEP")
-heatmap_datagenus_VerveurEau <- data.frame(genus = names(genre_counts_VerveurEau), count = as.numeric(genre_counts_VerveurEau), Condition = "VerveurEau")
-heatmap_datagenus_VerveurSedi <- data.frame(genus = names(genre_counts_VerveurSedi), count = as.numeric(genre_counts_VerveurSedi), Condition = "VerveurSedi")
+heatmap_datagenus_VerveurGDND <- data.frame(genus = names(genus_counts_VerveurGDND), count = as.numeric(genus_counts_VerveurGDND), Condition = "VerveurGDND")
+heatmap_datagenus_VerveurGDDEP <- data.frame(genus = names(genus_counts_VerveurGDDEP), count = as.numeric(genus_counts_VerveurGDDEP), Condition = "VerveurGDDEP")
+heatmap_datagenus_VerveurEau <- data.frame(genus = names(genus_counts_VerveurEau), count = as.numeric(genus_counts_VerveurEau), Condition = "VerveurEau")
+heatmap_datagenus_VerveurSedi <- data.frame(genus = names(genus_counts_VerveurSedi), count = as.numeric(genus_counts_VerveurSedi), Condition = "VerveurSedi")
 
 # Fusionner les dataframes
 heatmap_data_genus <- rbind(heatmap_datagenus_BarnenezGDND, heatmap_datagenus_BarnenezGDDEP, heatmap_datagenus_BarnenezEau, heatmap_datagenus_BarnenezSedi, heatmap_datagenus_VerveurGDND, heatmap_datagenus_VerveurGDDEP,heatmap_datagenus_VerveurEau, heatmap_datagenus_VerveurSedi)
@@ -823,59 +930,238 @@ heatmap_plot_genus <- ggplot(heatmap_data_genus, aes(x = genus, y = Condition, f
   geom_tile() +
   geom_text(aes(label = count), vjust = 0.5, color = "white") +  
   scale_fill_gradient(low = "skyblue", high = "darkblue") +
-  labs(title = "Heatmap de présence des genres bactériens - Verveur et Barnenez", x = "Genre", y = "Conditions") +
+  labs(title = "Heatmap de présence des genus bactériens - Verveur et Barnenez", x = "genus", y = "Conditions") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5))
 print(heatmap_plot_genus)
 ```
 
-
 ```{r}
-# Compter le nombre d'occurrences de chaque genre pour chaque échantillon
-genre_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$class)
-genre_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$class)
-genre_counts_BarnenezEau <- table(filtered_data_BarnenezEau$class)
-genre_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$class)
+# Définir l'ordre désiré pour les genres
+order_genus <- c("Pseudomonas", "Pseudoalteromonas", "Cobetia", "Vibrio", "Algoriphagus", "Flavobacterium", "Pseudalkalibacillus", "Shewanella", "Bacillus", "Paraglaciecola", "Salinibacterium", "Winogradskyella", "Rahnella", "Cellulophaga", "Pseudovibrio", "Rheinheimera", "Zobellia", "Microbacterium", "Aliiglaciecola", "Carnobacterium", "Cellvibrio", "Cytobacillus", "Demequina", "Formosa", "Hydrogenophaga", "Marinagarivorans", "Metabacillus", "Motilimonas", "Niallia", "Nonlabens", "Olleya", "Paracoccus", "Pedobacter", "Peribacillus", "Plantibacter", "Polaribacter", "Pseudocolwellia", "Pseudorhodobacter", "Pseudosulfitobacter", "Psychromonas", "Sanguibacter", "Stenotrophomonas", "Tenacibaculum", "Yoonia")
 
-genre_counts_VerveurGDND <- table(filtered_data_VerveurGDND$class)
-genre_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$class)
-genre_counts_VerveurEau <- table(filtered_data_VerveurEau$class)
-genre_counts_VerveurSedi <- table(filtered_data_VerveurSedi$class)
-
-# Créer une dataframe pour chaque échantillon
-heatmap_dataclass_BarnenezGDND <- data.frame(class = names(genre_counts_BarnenezGDND), count = as.numeric(genre_counts_BarnenezGDND), Condition = "BarnenezGDND")
-heatmap_dataclass_BarnenezGDDEP <- data.frame(class = names(genre_counts_BarnenezGDDEP), count = as.numeric(genre_counts_BarnenezGDDEP), Condition = "BarnenezGDDEP")
-heatmap_dataclass_BarnenezEau <- data.frame(class = names(genre_counts_BarnenezEau), count = as.numeric(genre_counts_BarnenezEau), Condition = "BarnenezEau")
-heatmap_dataclass_BarnenezSedi <- data.frame(class = names(genre_counts_BarnenezSedi), count = as.numeric(genre_counts_BarnenezSedi), Condition = "BarnenezSedi")
-
-heatmap_dataclass_VerveurGDND <- data.frame(class = names(genre_counts_VerveurGDND), count = as.numeric(genre_counts_VerveurGDND), Condition = "VerveurGDND")
-heatmap_dataclass_VerveurGDDEP <- data.frame(class = names(genre_counts_VerveurGDDEP), count = as.numeric(genre_counts_VerveurGDDEP), Condition = "VerveurGDDEP")
-heatmap_dataclass_VerveurEau <- data.frame(class = names(genre_counts_VerveurEau), count = as.numeric(genre_counts_VerveurEau), Condition = "VerveurEau")
-heatmap_dataclass_VerveurSedi <- data.frame(class = names(genre_counts_VerveurSedi), count = as.numeric(genre_counts_VerveurSedi), Condition = "VerveurSedi")
-
-# Fusionner les dataframes
-heatmap_data_class <- rbind(heatmap_dataclass_BarnenezGDND, heatmap_dataclass_BarnenezGDDEP, heatmap_dataclass_BarnenezEau, heatmap_dataclass_BarnenezSedi, heatmap_dataclass_VerveurGDND, heatmap_dataclass_VerveurGDDEP, heatmap_dataclass_VerveurEau, heatmap_dataclass_VerveurSedi)
+# Convertir la variable genus en un facteur avec l'ordre spécifié
+heatmap_data_genus$genus <- factor(heatmap_data_genus$genus, levels = order_genus)
 
 # heatmap
-heatmap_plot_class <- ggplot(heatmap_data_class, aes(x = class, y = Condition, fill = count)) +
+heatmap_plot_genus <- ggplot(heatmap_data_genus, aes(x = genus, y = Condition, fill = count)) +
   geom_tile() +
   geom_text(aes(label = count), vjust = 0.5, color = "white") +  
   scale_fill_gradient(low = "skyblue", high = "darkblue") +
-  labs(title = "Heatmap de présence des classes bactériens - Verveur et Barnenez", x = "Classes", y = "Conditions") +
+  labs(title = "Heatmap de présence des genres bactériens - Verveur et Barnenez", x = "Genus", y = "Conditions") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5))
-print(heatmap_plot_class)
+
+print(heatmap_plot_genus)
+
+```
+
+
+
+```{r, OK }
+# Compter le nombre d'occurrences de chaque genus pour chaque échantillon
+genus_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$genus)
+genus_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$genus)
+genus_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
+genus_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$genus)
+
+genus_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
+genus_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
+genus_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
+genus_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
+
+# Créer une dataframe pour chaque échantillon
+heatmap_datagenus_BarnenezGDND <- data.frame(genus = names(genus_counts_BarnenezGDND), count = as.numeric(genus_counts_BarnenezGDND), Condition = "BarnenezGDND")
+heatmap_datagenus_BarnenezGDDEP <- data.frame(genus = names(genus_counts_BarnenezGDDEP), count = as.numeric(genus_counts_BarnenezGDDEP), Condition = "BarnenezGDDEP")
+heatmap_datagenus_BarnenezEau <- data.frame(genus = names(genus_counts_BarnenezEau), count = as.numeric(genus_counts_BarnenezEau), Condition = "BarnenezEau")
+heatmap_datagenus_BarnenezSedi <- data.frame(genus = names(genus_counts_BarnenezSedi), count = as.numeric(genus_counts_BarnenezSedi), Condition = "BarnenezSedi")
+
+heatmap_datagenus_VerveurGDND <- data.frame(genus = names(genus_counts_VerveurGDND), count = as.numeric(genus_counts_VerveurGDND), Condition = "VerveurGDND")
+heatmap_datagenus_VerveurGDDEP <- data.frame(genus = names(genus_counts_VerveurGDDEP), count = as.numeric(genus_counts_VerveurGDDEP), Condition = "VerveurGDDEP")
+heatmap_datagenus_VerveurEau <- data.frame(genus = names(genus_counts_VerveurEau), count = as.numeric(genus_counts_VerveurEau), Condition = "VerveurEau")
+heatmap_datagenus_VerveurSedi <- data.frame(genus = names(genus_counts_VerveurSedi), count = as.numeric(genus_counts_VerveurSedi), Condition = "VerveurSedi")
+
+# Fusionner les dataframes
+heatmap_data_genus <- rbind(heatmap_datagenus_BarnenezGDND, heatmap_datagenus_BarnenezGDDEP, heatmap_datagenus_BarnenezEau, heatmap_datagenus_BarnenezSedi, heatmap_datagenus_VerveurGDND, heatmap_datagenus_VerveurGDDEP, heatmap_datagenus_VerveurEau, heatmap_datagenus_VerveurSedi)
+
+# Générer le barplot avec les genres triés dans l'ordre souhaité
+bar_plot_combined3 <- ggplot(top_classs_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(data = subset(top_classs_combined3, duplicated_genus == FALSE), aes(label = Label), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 7) +
+  geom_text(data = subset(top_classs_combined3, duplicated_genus == TRUE), aes(label = symbol, x = Genus, y = symbol_y_pos + 1), color = "black", size = 7) +
+  labs(title = "Genres retrouvées sur les sites de Verveur et Barnenez", x = NULL, y = "Nombre de séquences") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+  scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 16)) +
+  annotate("text", x = 38, y = 9.5, label = paste("Total de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de séquences pour Barnenez:", total_classsBarnenez, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de classes pour Verveur:", total_classsVerveur, "\nNombre total de séquences pour les deux sites combinés:", total_classs_combined3), hjust = 1, vjust = -0.1, size = 5) +
+  theme(legend.position = "right", 
+        legend.text = element_text(size = 15), # Modifier la taille de la légende
+        axis.title.y = element_text(size = 15), # Modifier la taille du titre de l'axe des ordonnées
+        axis.text.y = element_text(size = 15)) + # Modifier la taille des chiffres de l'axe des ordonnées
+  guides(fill = guide_legend(title = "Sites:", title.theme = element_text(size = 15))) # Modifier la taille du titre de la légende
+
+        
+      
+
+#Légende symboles pour classes bactérienne 
+
+legend_text <- paste(names(class_symbols), class_symbols, sep = ": ")
+legend_text <- paste(legend_text, collapse = "\n")
+legend_title <- "Classes bactérienne :"
+# Concaténer les textes avec le titre de la légende
+legend_text <- paste(legend_title, "\n", legend_text)
+bar_plot_combined3 <- bar_plot_combined3 + 
+  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 5, color = "black", parse = FALSE)
+
+# Définir l'ordre désiré pour les genres
+order_genus <- c("Pseudomonas", "Pseudoalteromonas", "Cobetia", "Vibrio", "Algoriphagus", "Flavobacterium", "Pseudalkalibacillus", "Shewanella", "Bacillus", "Paraglaciecola", "Salinibacterium", "Winogradskyella", "Rahnella", "Cellulophaga", "Pseudovibrio", "Rheinheimera", "Zobellia", "Microbacterium", "Aliiglaciecola", "Carnobacterium", "Cellvibrio", "Cytobacillus", "Demequina", "Formosa", "Hydrogenophaga", "Marinagarivorans", "Metabacillus", "Motilimonas", "Niallia", "Nonlabens", "Olleya", "Paracoccus", "Pedobacter", "Peribacillus", "Plantibacter", "Polaribacter", "Pseudocolwellia", "Pseudorhodobacter", "Pseudosulfitobacter", "Psychromonas", "Sanguibacter", "Stenotrophomonas", "Tenacibaculum", "Yoonia")
+
+# Convertir la variable genus en un facteur avec l'ordre spécifié
+heatmap_data_genus$genus <- factor(heatmap_data_genus$genus, levels = order_genus)
+
+# heatmap
+heatmap_plot_genus <- ggplot(heatmap_data_genus, aes(x = genus, y = Condition, fill = count)) +
+  geom_tile() +
+  geom_text(aes(label = count), vjust = 0.5, color = "white") +  
+  scale_fill_gradient(low = "skyblue", high = "darkblue", name = "Nombre 
+de séquences :") + # Modifier le titre de la légende
+  labs(x = "Genres", y = "Compartiments") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+        axis.text.y = element_text(size = 12), 
+        plot.title = element_text(hjust = 0.5),
+        legend.text = element_text(size = 15), # Modifier la taille du texte de la légende
+        legend.title = element_text(size = 15), # Modifier la taille du titre de la légende
+        axis.title = element_text(size = 15)) # Modifier la taille du texte des étiquettes des axes x et y
+
+
+# Combiner les deux graphiques en un seul plot verticalement aligné
+combined_plot <- bar_plot_combined3 / heatmap_plot_genus + plot_layout(ncol = 1, heights = c(1, 2))
+
+combined_plot <- wrap_plots(bar_plot_combined3, heatmap_plot_genus, ncol = 1)
+print(combined_plot)
+```
+```{r}
+ggsave("Figures/combined_plot.png", combined_plot, width = 20, height = 10, units = "in")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Libraries nécessaires
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+# Compter le nombre d'occurrences de chaque genus pour chaque échantillon
+genus_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$genus)
+genus_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$genus)
+genus_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
+genus_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$genus)
+
+genus_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
+genus_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
+genus_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
+genus_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
+
+# Créer une dataframe pour chaque échantillon
+heatmap_datagenus_BarnenezGDND <- data.frame(genus = names(genus_counts_BarnenezGDND), count = as.numeric(genus_counts_BarnenezGDND), Condition = "BarnenezGDND")
+heatmap_datagenus_BarnenezGDDEP <- data.frame(genus = names(genus_counts_BarnenezGDDEP), count = as.numeric(genus_counts_BarnenezGDDEP), Condition = "BarnenezGDDEP")
+heatmap_datagenus_BarnenezEau <- data.frame(genus = names(genus_counts_BarnenezEau), count = as.numeric(genus_counts_BarnenezEau), Condition = "BarnenezEau")
+heatmap_datagenus_BarnenezSedi <- data.frame(genus = names(genus_counts_BarnenezSedi), count = as.numeric(genus_counts_BarnenezSedi), Condition = "BarnenezSedi")
+
+heatmap_datagenus_VerveurGDND <- data.frame(genus = names(genus_counts_VerveurGDND), count = as.numeric(genus_counts_VerveurGDND), Condition = "VerveurGDND")
+heatmap_datagenus_VerveurGDDEP <- data.frame(genus = names(genus_counts_VerveurGDDEP), count = as.numeric(genus_counts_VerveurGDDEP), Condition = "VerveurGDDEP")
+heatmap_datagenus_VerveurEau <- data.frame(genus = names(genus_counts_VerveurEau), count = as.numeric(genus_counts_VerveurEau), Condition = "VerveurEau")
+heatmap_datagenus_VerveurSedi <- data.frame(genus = names(genus_counts_VerveurSedi), count = as.numeric(genus_counts_VerveurSedi), Condition = "VerveurSedi")
+
+# Fusionner les dataframes
+heatmap_data_genus <- rbind(heatmap_datagenus_BarnenezGDND, heatmap_datagenus_BarnenezGDDEP, heatmap_datagenus_BarnenezEau, heatmap_datagenus_BarnenezSedi, heatmap_datagenus_VerveurGDND, heatmap_datagenus_VerveurGDDEP,heatmap_datagenus_VerveurEau, heatmap_datagenus_VerveurSedi)
+
+# Générer le barplot avec les genres triés dans l'ordre souhaité
+bar_plot_combined3 <- ggplot(top_classs_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(data = subset(top_classs_combined3, duplicated_genus == FALSE), aes(label = Label), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 9) +
+  geom_text(data = subset(top_classs_combined3, duplicated_genus == TRUE), aes(label = symbol, x = Genus, y = symbol_y_pos + 0.5), color = "black", size = 9) +
+  labs(title = "Classes les plus retrouvées pour les deux sites", x = "Genus", y = "Nombre de séquences") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +
+  annotate("text", x = Inf, y = 9, label = paste("Total de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de séquences pour Barnenez:", total_classsBarnenez, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de classes pour Verveur:", total_classsVerveur, "\nNombre total de séquences pour les deux sites combinés:", total_classs_combined3), hjust = 1, vjust = -0.1) +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(title = "Ville"))
+
+# Créer une légende manuelle pour les symboles
+legend_text <- paste(names(class_symbols), class_symbols, sep = ": ")
+legend_text <- paste(legend_text, collapse = "\n")
+bar_plot_combined3 <- bar_plot_combined3 + 
+  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 4, color = "black", parse = FALSE)
+
+# Générer la heatmap avec les genres triés dans le même ordre que le barplot
+heatmap_plot_genus <- ggplot(heatmap_data_genus, aes(x = reorder(genus, -count), y = Condition, fill = count)) +
+  geom_tile() +
+  geom_text(aes(label = count), vjust = 0.5, color = "white") +  
+  scale_fill_gradient(low = "skyblue", high = "darkblue") +
+  labs(title = "Heatmap de présence des genus bactériens - Verveur et Barnenez", x = "genus", y = "Conditions") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5))
+
+# Combiner les deux graphiques en un seul plot verticalement aligné
+combined_plot <- bar_plot_combined3 / heatmap_plot_genus + plot_layout(ncol = 1, heights = c(1, 2))
+
+# Afficher le graphique combiné
+print(combined_plot)
+
+```
+
+
+```{r}
+bar_plot_combined3 <- ggplot(top_classs_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Classes les plus retrouvées pour les deux sites", x = NULL, y = "Nombre de séquences") +  # Modifier le titre de l'axe des abscisses
+  theme(axis.text.x = element_blank(),  # Supprimer le texte de l'axe des abscisses
+        axis.ticks.x = element_blank()) +  # Supprimer les ticks de l'axe des abscisses
+  scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
+  scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 15)) +  
+  annotate("text", x = Inf, y = 9, label = paste("Total de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de séquences pour Barnenez:", total_classsBarnenez, "\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de classes pour Verveur:", total_classsVerveur, "\nNombre total de séquences pour les deux sites combinés:", total_classs_combined3), hjust = 1, vjust = -0.1) +
+  theme(legend.position = "none")  # Supprimer la légende
+
+# Ne pas ajouter les noms de genres
+bar_plot_combined3 <- bar_plot_combined3 + 
+  geom_text(data = NULL, aes(label = ""), position = "identity")
+
+library(cowplot)
+
+# Organiser les graphiques avec le barplot au-dessus
+combined_plot <- plot_grid(
+  bar_plot_combined3,
+  heatmap_plot_genus,
+  ncol = 1, align = 'v', axis = 'lr'  # Alignement vertical (par Condition)
+)
+
+# Afficher le graphique combiné
+print(combined_plot)
+
 ```
 
 
 ```{r, Uniquement pour Barnenez Eau} 
-genre_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
+class_counts_BarnenezEau <- table(filtered_data_BarnenezEau$genus)
 
-bar_plot_BarnenezEau <- ggplot(data.frame(Genus = names(genre_counts_BarnenezEau), Count = as.numeric(genre_counts_BarnenezEau)), 
+bar_plot_BarnenezEau <- ggplot(data.frame(Genus = names(class_counts_BarnenezEau), Count = as.numeric(class_counts_BarnenezEau)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#145C9E") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Barnenez Eau", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Barnenez Eau", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   # Ajout de l'annotation pour le nombre total de séquences
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_BarnenezEau)), hjust = 1, vjust = 0)
@@ -886,15 +1172,15 @@ print(bar_plot_BarnenezEau)
 ```{r, Uniquement pour Verveur Eau} 
 
 
-genre_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
+class_counts_VerveurEau <- table(filtered_data_VerveurEau$genus)
 
 
 
-bar_plot_VerveurEau <- ggplot(data.frame(Genus = names(genre_counts_VerveurEau), Count = as.numeric(genre_counts_VerveurEau)), 
+bar_plot_VerveurEau <- ggplot(data.frame(Genus = names(class_counts_VerveurEau), Count = as.numeric(class_counts_VerveurEau)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Verveur Eau", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Verveur Eau", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   # Ajout de l'annotation pour le nombre total de séquences
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurEau)), hjust = 1, vjust = 0)
@@ -903,13 +1189,13 @@ print(bar_plot_VerveurEau)
 ```
 
 ```{r, Uniquement pour Barnenez Sédiments} 
-genre_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$genus)
+class_counts_BarnenezSedi <- table(filtered_data_BarnenezSedi$genus)
 
-bar_plot_BarnenezSedi <- ggplot(data.frame(Genus = names(genre_counts_BarnenezSedi), Count = as.numeric(genre_counts_BarnenezSedi)), 
+bar_plot_BarnenezSedi <- ggplot(data.frame(Genus = names(class_counts_BarnenezSedi), Count = as.numeric(class_counts_BarnenezSedi)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#145C9E") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Barnenez Sédiments", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Barnenez Sédiments", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   # Ajout de l'annotation pour le nombre total de séquences
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_BarnenezSedi)), hjust = 1, vjust = 0)
@@ -917,13 +1203,13 @@ bar_plot_BarnenezSedi <- ggplot(data.frame(Genus = names(genre_counts_BarnenezSe
 print(bar_plot_BarnenezSedi)
 ```
 ```{r, Uniquement pour Verveur Sédiments} 
-genre_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
+class_counts_VerveurSedi <- table(filtered_data_VerveurSedi$genus)
 
-bar_plot_VerveurSedi <- ggplot(data.frame(Genus = names(genre_counts_VerveurSedi), Count = as.numeric(genre_counts_VerveurSedi)), 
+bar_plot_VerveurSedi <- ggplot(data.frame(Genus = names(class_counts_VerveurSedi), Count = as.numeric(class_counts_VerveurSedi)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Verveur Sédiments", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Verveur Sédiments", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   # Ajout de l'annotation pour le nombre total de séquences
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurSedi)), hjust = 1, vjust = 0)
@@ -932,14 +1218,14 @@ print(bar_plot_VerveurSedi)
 ```
 
 ```{r, Uniquement pour Barnenez GDND} 
-genre_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$genus)
+class_counts_BarnenezGDND <- table(filtered_data_BarnenezGDND$genus)
 
-bar_plot_BarnenezGDND <- ggplot(data.frame(Genus = names(genre_counts_BarnenezGDND), Count = as.numeric(genre_counts_BarnenezGDND)), 
+bar_plot_BarnenezGDND <- ggplot(data.frame(Genus = names(class_counts_BarnenezGDND), Count = as.numeric(class_counts_BarnenezGDND)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#145C9E") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 3, 1), limits = c(0, 3)) +  # Modifier l'échelle des données y
-  labs(title = "Genres retrouvés - Barnenez GDND", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Barnenez GDND", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_BarnenezGDND)), hjust = 1, vjust = 0)
   
@@ -947,13 +1233,13 @@ print(bar_plot_BarnenezGDND)
 ```
 
 ```{r, Uniquement pour Verveur GDND} 
-genre_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
+class_counts_VerveurGDND <- table(filtered_data_VerveurGDND$genus)
 
-bar_plot_VerveurGDND <- ggplot(data.frame(Genus = names(genre_counts_VerveurGDND), Count = as.numeric(genre_counts_VerveurGDND)), 
+bar_plot_VerveurGDND <- ggplot(data.frame(Genus = names(class_counts_VerveurGDND), Count = as.numeric(class_counts_VerveurGDND)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Verveur GDND", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Verveur GDND", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurGDND)), hjust = 1, vjust = 0)
   
@@ -961,13 +1247,13 @@ print(bar_plot_VerveurGDND)
 ```
 
 ```{r, Uniquement pour Barnenez GDDEP} 
-genre_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$genus)
+class_counts_BarnenezGDDEP <- table(filtered_data_BarnenezGDDEP$genus)
 
-bar_plot_BarnenezGDDEP <- ggplot(data.frame(Genus = names(genre_counts_BarnenezGDDEP), Count = as.numeric(genre_counts_BarnenezGDDEP)), 
+bar_plot_BarnenezGDDEP <- ggplot(data.frame(Genus = names(class_counts_BarnenezGDDEP), Count = as.numeric(class_counts_BarnenezGDDEP)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#145C9E") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Barnenez GDDEP", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Barnenez GDDEP", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_BarnenezGDDEP)), hjust = 1, vjust = 0)
   
@@ -975,37 +1261,36 @@ print(bar_plot_BarnenezGDDEP)
 ```
 
 ```{r, Uniquement pour Verveur GDDEP} 
-genre_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
+class_counts_VerveurGDDEP <- table(filtered_data_VerveurGDDEP$genus)
 
-bar_plot_VerveurGDDEP <- ggplot(data.frame(Genus = names(genre_counts_VerveurGDDEP), Count = as.numeric(genre_counts_VerveurGDDEP)), 
+bar_plot_VerveurGDDEP <- ggplot(data.frame(Genus = names(class_counts_VerveurGDDEP), Count = as.numeric(class_counts_VerveurGDDEP)), 
                               aes(x = reorder(Genus, -Count), y = Count)) +
   geom_bar(stat = "identity", fill = "#59C9A5") +
   geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
-  labs(title = "Genres retrouvés - Verveur GDDEP", x = "Genre", y = "Nombre de séquences") +
+  labs(title = "classs retrouvés - Verveur GDDEP", x = "class", y = "Nombre de séquences") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   annotate("text", x = Inf, y = -Inf, label = paste("Total de séquences :", nrow(filtered_data_VerveurGDDEP)), hjust = 1, vjust = 0)
   
 print(bar_plot_VerveurGDDEP)
 ```
 
-
-
-```{r, diagramme de Venn}
-# Extraire les genres uniques de chaque échantillon
-genres_BarnenezEau <- unique(data_BarnenezEau$genus)
-genres_BarnenezSedi <- unique(data_BarnenezSedi$genus)
-genres_BarnenezGDND <- unique(data_BarnenezGDND$genus)
-genres_BarnenezGDDEP <- unique(data_BarnenezGDDEP$genus)
+```{r, diagramme de Venn barnenez}
+# Extraire les classs uniques de chaque échantillon
+classs_BarnenezEau <- unique(data_BarnenezEau$genus)
+classs_BarnenezSedi <- unique(data_BarnenezSedi$genus)
+classs_BarnenezGDND <- unique(data_BarnenezGDND$genus)
+classs_BarnenezGDDEP <- unique(data_BarnenezGDDEP$genus)
 
 # Créer une liste avec les ensembles pour chaque échantillon
 sets_listBarnenez <- list(
-  BarnenezEau = genres_BarnenezEau,
-  BarnenezSedi = genres_BarnenezSedi,
-  BarnenezGDND = genres_BarnenezGDND,
-  BarnenezGDDEP = genres_BarnenezGDDEP
+  BarnenezEau = classs_BarnenezEau,
+  BarnenezSedi = classs_BarnenezSedi,
+  BarnenezGDND = classs_BarnenezGDND,
+  BarnenezGDDEP = classs_BarnenezGDDEP
 )
 
-venn_plotBarnenez <- ggvenn(sets_listBarnenez, show_elements = TRUE,
+# Créer un diagramme de Venn avec ggvenn
+venn_plotBarnenez <- ggvenn(sets_listBarnenez , show_elements = TRUE,
   show_percentage = FALSE,
   digits = 1,
   fill_color = c("skyblue", "orange2", "#1B998B", "#C5D86D"),
@@ -1013,10 +1298,10 @@ venn_plotBarnenez <- ggvenn(sets_listBarnenez, show_elements = TRUE,
   stroke_color = "black",
   stroke_alpha = 1,
   stroke_size = 0.1,
-  stroke_linetype = "solid", 
+  stroke_linetype = "solid",
   set_name_color = "black",
-  set_name_size = 2,  # Ajustez la taille de la police ici BarnenezSedi BarnenezEau BarnenezGD..
-  text_size = 2,  # Ajustez la taille de la police pour les genres
+  set_name_size = 6, 
+  text_size = 3.5, 
   label_sep = "
   ",
   count_column = NULL,
@@ -1033,19 +1318,95 @@ venn_plotBarnenez +
   theme_void()  # Retire le quadrillage de fond
 ```
 
+```{r, diagramme de Venn barnenez eaux sedi gdnd}
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_listBarnenez1 <- list(
+  BarnenezEau = classs_BarnenezEau,
+  BarnenezSedi = classs_BarnenezSedi,
+  BarnenezGDND = classs_BarnenezGDND
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plotBarnenez1 <- ggvenn(sets_listBarnenez1 , show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("skyblue", "orange2", "#1B998B"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 0.1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 5, 
+  text_size = 3.5, 
+  label_sep = "
+  ",
+  count_column = FALSE,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plotBarnenez1$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plotBarnenez1 +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
+```{r, diagramme de Venn barnenez gdnd gddep}
+sets_listBarnenez2 <- list(
+  BarnenezGDND = classs_BarnenezGDND,
+  BarnenezGDDEP = classs_BarnenezGDDEP
+)
+
+venn_plotBarnenez2 <- ggvenn(sets_listBarnenez2, show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("#1B998B", "#C5D86D"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 0.1,
+  stroke_linetype = "solid", 
+  set_name_color = "black",
+  set_name_size = 5,  # Ajustez la taille de la police ici BarnenezSedi BarnenezEau BarnenezGD..
+  text_size = 4,  # Ajustez la taille de la police pour les classs
+  label_sep = "
+  ",
+  count_column = NULL,
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plotBarnenez2$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plotBarnenez2 +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
+```{r, liaison diag venn}
+grid.arrange(venn_plotBarnenez1, venn_plotBarnenez2, ncol = 2)
+```
+
+
+
 ```{r}
-# Extraire les genres uniques de chaque échantillon
-genres_VerveurEau <- unique(data_VerveurEau$genus)
-genres_VerveurSedi <- unique(data_VerveurSedi$genus)
-genres_VerveurGDND <- unique(data_VerveurGDND$genus)
-genres_VerveurGDDEP <- unique(data_VerveurGDDEP$genus)
+# Extraire les classs uniques de chaque échantillon
+classs_VerveurEau <- unique(data_VerveurEau$genus)
+classs_VerveurSedi <- unique(data_VerveurSedi$genus)
+classs_VerveurGDND <- unique(data_VerveurGDND$genus)
+classs_VerveurGDDEP <- unique(data_VerveurGDDEP$genus)
 
 # Créer une liste avec les ensembles pour chaque échantillon
 sets_listVerveur <- list(
-  VerveurEau = genres_VerveurEau,
-  VerveurSedi = genres_VerveurSedi,
-  VerveurGDND = genres_VerveurGDND,
-  VerveurGDDEP = genres_VerveurGDDEP
+  VerveurEau = classs_VerveurEau,
+  VerveurSedi = classs_VerveurSedi,
+  VerveurGDND = classs_VerveurGDND,
+  VerveurGDDEP = classs_VerveurGDDEP
 )
 
 # Créer un diagramme de Venn avec ggvenn
@@ -1059,8 +1420,8 @@ venn_plotVerveur <- ggvenn(sets_listVerveur , show_elements = TRUE,
   stroke_size = 0.1,
   stroke_linetype = "solid",
   set_name_color = "black",
-  set_name_size = 2,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
-  text_size = 2,  # Ajustez la taille de la police pour les genres
+  set_name_size = 5,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
+  text_size = 3.5,  # Ajustez la taille de la police pour les classs
   label_sep = "
   ",
   count_column = NULL,
@@ -1077,7 +1438,81 @@ venn_plotVerveur +
   theme_void()  # Retire le quadrillage de fond
 ```
 
-```{r}
+```{r, venn verveur sedi eau gdnd}
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_listVerveur1 <- list(
+  VerveurEau = classs_VerveurEau,
+  VerveurSedi = classs_VerveurSedi,
+  VerveurGDND = classs_VerveurGDND
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plotVerveur1 <- ggvenn(sets_listVerveur1 , show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("skyblue", "orange2", "#1B998B"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 0.1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 6,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
+  text_size = 3.5,  # Ajustez la taille de la police pour les classs
+  label_sep = "
+  ",
+  count_column = NULL,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plotVerveur1$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plotVerveur1 +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
+```{r, venn verveur gdnd gddep}
+
+# Créer une liste avec les ensembles pour chaque échantillon
+sets_listVerveur2 <- list(
+  VerveurGDND = classs_VerveurGDND,
+  VerveurGDDEP = classs_VerveurGDDEP
+)
+
+# Créer un diagramme de Venn avec ggvenn
+venn_plotVerveur2 <- ggvenn(sets_listVerveur2 , show_elements = TRUE,
+  show_percentage = FALSE,
+  digits = 1,
+  fill_color = c("#1B998B", "#C5D86D"),
+  fill_alpha = 1.5,
+  stroke_color = "black",
+  stroke_alpha = 1,
+  stroke_size = 0.1,
+  stroke_linetype = "solid",
+  set_name_color = "black",
+  set_name_size = 5,  # Ajustez la taille de la police ici VerveurSedi VerveurEau VerveurGD..
+  text_size = 4,  # Ajustez la taille de la police pour les classs
+  label_sep = "
+  ",
+  count_column = NULL,
+  show_outside = c("auto", "none", "always")
+)
+
+# Récupérer les chiffres pour chaque ensemble
+counts <- venn_plotVerveur2$data$label
+
+# Ajouter les étiquettes aux positions appropriées
+venn_plotVerveur2 +
+  annotate("text", x = counts$x, y = counts$y, label = counts$label, color = "black") +
+  theme_minimal(base_size = 8) +  # Ajustez la taille de la police du thème global si nécessaire
+  theme_void()  # Retire le quadrillage de fond
+```
+
+```{r, pdf save}
 pdf("Figures/Figures.pdf", width = 12, height = 8)
 
 grid.arrange(heatmap_plot_genus)

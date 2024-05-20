@@ -8,9 +8,8 @@ library(ggplot2)
 dnbecoli <- read.csv2("Dnbecoli.csv")
 
 dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
-dnbecoli$condition <- factor(dnbecoli$condition, levels = c("ND", "D"))
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
 
-# Réorganiser les niveaux du facteur 'mois' pour garantir l'ordre chronologique
 dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"))
 
 dnbecoli_combined <- rbind(
@@ -23,9 +22,9 @@ dnbecoli_combined <- rbind(
 # Trier les mois dans l'ordre chronologique
 dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
 
-graphique_combined <- ggplot(dnbecoli_combined, aes(x = mois, y = Ecoli, fill = condition)) +
+Ecoli <- ggplot(dnbecoli_combined, aes(x = mois, y = Ecoli, fill = conditions)) +
   geom_bar(stat = "identity", position = "dodge", color = "black") +
-  coord_cartesian(ylim = c(0, max(6))) +
+  coord_cartesian(ylim = c(0, max(5))) +
   geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
                 position = position_dodge(width = 0.9)) +
   geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
@@ -36,10 +35,14 @@ graphique_combined <- ggplot(dnbecoli_combined, aes(x = mois, y = Ecoli, fill = 
   scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
   facet_grid(.~Site) +
   theme_gray() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-print(graphique_combined)
-
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 15),  
+        axis.title.x = element_text(size = 8),  
+        axis.title.y = element_text(size = 8))
+print(Ecoli)
 ```
 
+```{r}
+ggsave("Figures/Ecoli.png", Ecoli, width = 12, height = 6, units = "in")
+```
 
