@@ -941,6 +941,15 @@ heatmap_plot_class <- ggplot(heatmap_data_class, aes(x = class, y = Condition, f
        x = "Classes", 
        y = "Compartiments",
        fill = "Nombre de\nsouches :") +  # Changer la légende
+  annotate("text", x = 1, y = 8.7, size = 6,label = "n=6 (4%)", color = "black") +
+  annotate("text", x = 2, y = 8.7, size = 6,label = "n=1 (<1%)", color = "black") +
+  annotate("text", x = 3, y = 8.7, size = 6,label = "n=81 (55%)", color = "black") +
+  annotate("text", x = 4, y = 8.7, size = 6,label = "n=9 (6%)", color = "black") +
+  annotate("text", x = 5, y = 8.7, size = 6,label = "n=19 (13%)", color = "black") +
+  annotate("text", x = 6, y = 8.7, size = 6,label = "n=9 (6%)", color = "black") +
+  annotate("text", x = 7, y = 8.7, size = 6,label = "n=19 (13%)", color = "black") +
+  annotate("text", x = 8, y = 8.7, size = 6,label = "n=1 (<1%)", color = "black") +
+  scale_y_discrete(expand = expand_scale(mult = c(0, 0.13)))+
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 25),  # Ajuster la taille de la police des abscisses
         legend.text = element_text(size = 20),  # Modifier la taille de la légende
         axis.text.y = element_text(size = 25),  # Ajuster la taille de la police des ordonnées
