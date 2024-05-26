@@ -544,6 +544,47 @@ data_VerveurGDDEP <- data_VerveurGDDEP[, c(names(data_VerveurGDDEP)[names(data_V
 print(data_VerveurGDDEP)
 ```
 
+
+
+```{r, stats sur les sequences}
+# Calculer les moyennes pour all_filtered_dataVerveur
+mean_length_verveur <- mean(all_filtered_dataVerveur$length, na.rm = TRUE)
+mean_qcovs_verveur <- mean(all_filtered_dataVerveur$qcovs, na.rm = TRUE)
+mean_pident_verveur <- mean(all_filtered_dataVerveur$pident, na.rm = TRUE)
+
+# Afficher les moyennes pour all_filtered_dataVerveur
+cat("Moyennes pour all_filtered_dataVerveur:\n")
+cat("length: ", mean_length_verveur, "\n")
+cat("qcovs: ", mean_qcovs_verveur, "\n")
+cat("pident: ", mean_pident_verveur, "\n\n")
+
+# Calculer les moyennes pour all_filtered_dataBarnenez
+mean_length_barnenez <- mean(all_filtered_dataBarnenez$length, na.rm = TRUE)
+mean_qcovs_barnenez <- mean(all_filtered_dataBarnenez$qcovs, na.rm = TRUE)
+mean_pident_barnenez <- mean(all_filtered_dataBarnenez$pident, na.rm = TRUE)
+
+# Afficher les moyennes pour all_filtered_dataBarnenez
+cat("Moyennes pour all_filtered_dataBarnenez:\n")
+cat("length: ", mean_length_barnenez, "\n")
+cat("qcovs: ", mean_qcovs_barnenez, "\n")
+cat("pident: ", mean_pident_barnenez, "\n\n")
+
+# Combiner les deux dataframes
+combined_data <- rbind(all_filtered_dataVerveur, all_filtered_dataBarnenez)
+
+# Calculer les moyennes pour le dataframe combiné
+mean_length_combined <- mean(combined_data$length, na.rm = TRUE)
+mean_qcovs_combined <- mean(combined_data$qcovs, na.rm = TRUE)
+mean_pident_combined <- mean(combined_data$pident, na.rm = TRUE)
+
+# Afficher les moyennes pour le dataframe combiné
+
+cat("Moyennes pour les deux sites combinés:\n")
+cat("Length: ", mean_length_combined, "\n")
+cat("Qcovs: ", mean_qcovs_combined, "\n")
+cat("Pident: ", mean_pident_combined, "\n")
+```
+
 ```{r, Sauvegarder data_BarnenezGDND au format CSV}
 write.csv(data_BarnenezGDND, "/Users/amrozins/Documents/workflow/Résultats/data_BarnenezGDND.csv", row.names = FALSE)
 ```
