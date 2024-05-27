@@ -172,7 +172,7 @@ cltax_BarnenezEau
 ```
 
 ```{r, Résultats Totaux BarnenezSedi}
-cltax_BarnenezSedi=cbind(cl_BarnenezSedi,taxlist_BarnenezSedi) #bind BLAST hits and taxonomy table
+cltax_BarnenezSedi=cbind(cl_BarnenezSedi,taxlist_BarnenezSedi)
 colnames(cltax_BarnenezSedi)
 cltax_BarnenezSedi
 ```
