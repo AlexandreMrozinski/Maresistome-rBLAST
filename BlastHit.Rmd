@@ -1097,22 +1097,45 @@ order_conditions <- c("BarnenezGDDEP", "BarnenezGDND", "BarnenezSedi", "Barnenez
 # Convertir la variable Condition en un facteur avec l'ordre spécifié
 heatmap_data_genus$Condition <- factor(heatmap_data_genus$Condition, levels = order_conditions)
 
-# Générer le barplot avec les genres triés dans l'ordre souhaité
+# Generate the barplot with the genres sorted in the desired order
 bar_plot_combinedgenresclasses <- ggplot(top_genres_combined3, aes(x = reorder(Genus, -Count), y = Count, fill = Ville)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(data = subset(top_genres_combined3, duplicated_genus == FALSE), aes(label = Label), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 7) +
   geom_text(data = subset(top_genres_combined3, duplicated_genus == TRUE), aes(label = symbol, x = Genus, y = symbol_y_pos + 0.9), color = "black", size = 7) +
-  labs(title = "Genres retrouvées sur les sites de Verveur et Barnenez", x = NULL, y = "Nombre de séquences") +
+  labs(title = "Genres retrouvés sur les sites de Verveur et Barnenez", x = NULL, y = "Nombre de souches") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 16)) +
-  annotate("text", x = 38, y = 10, label = paste("\nTotal de séquences pour Verveur:", total_sequencesVerveur, "\nNombre de genres pour Verveur:", total_genresVerveur, "\nTotal de séquences pour Barnenez:", total_sequencesBarnenez, "\nNombre de genres pour Barnenez:", total_genresBarnenez, "\nNombre total de genres pour les deux sites combinés:", total_genres_combined3), hjust = 1, vjust = -0.1, size = 7) +
+  annotate("text", x = 1, y = 16, size = 3, label = "9.65%", color = "black") +
+  annotate("text", x = 2, y = 13, size = 3, label = "12.4%", color = "black") +
+  annotate("text", x = 3, y = 10, size = 3, label = "5.5%", color = "black") +
+  annotate("text", x = 4, y = 10, size = 3, label = "9%", color = "black") +
+  annotate("text", x = 5, y = 8, size = 3, label = "6.2%", color = "black") +
+  annotate("text", x = 6, y = 6, size = 3, label = "2.75%", color = "black") +
+  annotate("text", x = 7, y = 6, size = 3, label = "5.5%", color = "black") +
+  annotate("text", x = 8, y = 7, size = 3, label = "5.5%", color = "black") +
+  annotate("text", x = 9, y = 6, size = 3, label = "4.1%", color = "black") +
+  annotate("text", x = 10, y = 5, size = 3, label = "4.1%", color = "black") +
+  annotate("text", x = 11, y = 5, size = 3, label = "2%", color = "black") +
+  annotate("text", x = 12, y = 5, size = 3, label = "2%", color = "black") +
+  annotate("text", x = 13, y = 6, size = 3, label = "3.4%", color = "black") +
+  annotate("text", x = 14, y = 4, size = 3, label = "2.75%", color = "black") +
+  annotate("text", x = 15, y = 4, size = 3, label = "1.4%", color = "black") +
+  annotate("text", x = 16, y = 4, size = 3, label = "1.4%", color = "black") +
+  annotate("text", x = 17, y = 4, size = 3, label = "1.4%", color = "black") +
+  annotate("text", x = 18, y = 4, size = 3, label = "2%", color = "black") +
+  #bracket
+  annotate("segment", x = 19, xend = 19, y = 2.2, yend = 2.5, size = 0.5, color = "black") + #barre de gauche
+  annotate("segment", x = 19, xend = 44, y = 2.5, yend = 2.5, size = 0.5, color = "black") + #barre longueur
+  annotate("segment", x = 44, xend = 44, y = 2.2, yend = 2.5, size = 0.5, color = "black") + #barre de droite
+  annotate("segment", x = 31, xend = 31, y = 2.5, yend = 2.8, size = 0.5, color = "black") + #petite barre milieu
+  annotate("text", x = 31, y = 3.2, size = 3, label = "18.6%", color = "black") + #texte au dessus du bracket
   theme(legend.position = "right", 
-        legend.text = element_text(size = 15), # Modifier la taille de la légende
-        axis.title.y = element_text(size = 25), # Modifier la taille du titre de l'axe des ordonnées
-        axis.text.y = element_text(size = 15), # Modifier la taille des chiffres de l'axe des ordonnées
-        plot.title = element_text(size = 25, hjust = 0.5)) + # Modifier la taille du titre du graphique et centrer
-  guides(fill = guide_legend(title = "Sites:", title.theme = element_text(size = 15))) # Modifier la taille du titre de la légende
+        legend.text = element_text(size = 20), 
+        axis.title.y = element_text(size = 25), 
+        axis.text.y = element_text(size = 15),
+        plot.title = element_text(size = 25, hjust = 0.5)) + 
+  guides(fill = guide_legend(title = "Sites:", title.theme = element_text(size = 20)))
 
 #Légende symboles pour classes bactérienne 
 legend_text <- paste(names(class_symbols), class_symbols, sep = ": ")
@@ -1121,7 +1144,7 @@ legend_title <- "Classes bactérienne :"
 # Concaténer les textes avec le titre de la légende
 legend_text <- paste(legend_title, "\n", legend_text)
 bar_plot_combinedgenresclasses <- bar_plot_combinedgenresclasses + 
-  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 7, color = "black", parse = FALSE)
+  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 5, color = "black", parse = FALSE)
 
 # Définir l'ordre désiré pour les genres
 order_genus <- c("Pseudomonas", "Pseudoalteromonas", "Cobetia", "Vibrio", "Algoriphagus", "Flavobacterium", "Pseudalkalibacillus", "Shewanella", "Bacillus", "Paraglaciecola", "Salinibacterium", "Winogradskyella", "Rahnella", "Cellulophaga", "Pseudovibrio", "Rheinheimera", "Zobellia", "Microbacterium", "Aliiglaciecola", "Carnobacterium", "Cellvibrio", "Cytobacillus", "Demequina", "Formosa", "Hydrogenophaga", "Marinagarivorans", "Metabacillus", "Motilimonas", "Niallia", "Nonlabens", "Olleya", "Paracoccus", "Pedobacter", "Peribacillus", "Plantibacter", "Polaribacter", "Pseudocolwellia", "Pseudorhodobacter", "Pseudosulfitobacter", "Psychromonas", "Sanguibacter", "Stenotrophomonas", "Tenacibaculum", "Yoonia")
@@ -1136,15 +1159,15 @@ heatmap_plot_genus_ordered <- ggplot(heatmap_data_genus, aes(x = genus, y = Cond
   geom_tile() +
   geom_text(aes(label = count), vjust = 0.5, color = "white") +  
   scale_fill_gradient(low = "skyblue", high = "darkblue", name = "Nombre 
-de séquences :") + # Modifier le titre de la légende
+de souches :") + # Modifier le titre de la légende
   labs(x = "Genres", y = "Compartiments") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 25), # genres
-        axis.text.y = element_text(size = 20), # légende heatmap axe des ordonnées
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 20), # genres
+        axis.text.y = element_text(size = 15), # légende heatmap axe des ordonnées
         plot.title = element_text(hjust = 0.5),
         legend.text = element_text(size = 15), # Modifier la taille du texte de la légende (légende du code couleur)
-        legend.title = element_text(size = 15), # Modifier la taille du titre de la légende (nb de séquences)
+        legend.title = element_text(size = 20), # Modifier la taille du titre de la légende (nb de séquences)
         axis.title = element_text(size = 25)) + # Modifier la taille du texte des étiquettes des axes x et y
- geom_hline(yintercept = separation_position_y, linetype = "longdash", color = "#EF3E36", size = 2)  # Ajouter une ligne horizontale
+ geom_hline(yintercept = separation_position_y, linetype = "longdash", color = "#EF3E36", size = 1)  
 
 # Combiner les deux graphiques en un seul plot verticalement aligné
 combined_plot_heatbarplot <- bar_plot_combinedgenresclasses / heatmap_plot_genus_ordered + plot_layout(ncol = 1, heights = c(1, 2))
