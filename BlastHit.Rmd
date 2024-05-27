@@ -2,7 +2,7 @@
 title: "R Notebook"
 output: html_notebook
 ---
-TEST
+TESTTEST
 #Installer Blast+ https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 #Télécharger database 16s de NCBI https://ftp.ncbi.nlm.nih.gov/blast/db/ (16S_ribosomal_RNA...)
 #Hahsler M, Anurag N (2024). rBLAST: R Interface for the Basic Local Alignment Search Tool. R package version 1.0.0, https://github.com/mhahsler/rBLAST.
