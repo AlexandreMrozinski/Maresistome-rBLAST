@@ -42,7 +42,341 @@ Ecoli <- ggplot(dnbecoli_combined, aes(x = mois, y = Ecoli, fill = conditions)) 
 print(Ecoli)
 ```
 
+
+```{r, Verveur}
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
+
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023 & Site == "Verveur"), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024 & Site == "Verveur"), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+EcoliVerveur <- ggplot(subset(dnbecoli_combined, Site == "Verveur"), aes(x = mois, y = Ecoli, fill = conditions)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(5))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes issues du site de Verveur", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_gray() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 15),  
+        axis.title.x = element_text(size = 8),  
+        axis.title.y = element_text(size = 8))
+print(EcoliVerveur)
+```
+
+```{r, Barnenez}
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
+
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Mars", "Juin", "Septembre", "Decembre"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023 & Site == "Barnenez"), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024 & Site == "Barnenez"), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+EcoliBarnenez <- ggplot(subset(dnbecoli_combined, Site == "Barnenez"), aes(x = mois, y = Ecoli, fill = conditions)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +  # Ajustez la largeur des barres ici
+  coord_cartesian(ylim = c(0, max(5))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes issues du site de Barnenez", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_gray() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 15),  
+        axis.title.x = element_text(size = 8),  
+        axis.title.y = element_text(size = 8))
+print(EcoliBarnenez)
+```
+
+
+
+```{r, Verveur Alisson}
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
+
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023 & Site == "Verveur"), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024 & Site == "Verveur"), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+EcoliVerveurAlisson <- ggplot(subset(dnbecoli_combined, Site == "Verveur"), aes(x = mois, y = Ecoli, fill = conditions)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(5))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes issues du site de Verveur", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+facet_grid(.~Site) +
+   theme_light() +
+  theme(strip.text = element_text(size = 16, color = "black"),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+        plot.title = element_text(size = 15),
+        legend.text = element_text(size = 15), 
+        legend.title = element_text(size = 15),
+        axis.title.x = element_text(size = 15),  # Taille de la légende de l'axe des abscisses
+        axis.title.y = element_text(size = 20))  # Taille de la légende de l'axe des ordonnées
+print(EcoliVerveurAlisson)
+```
+
+
+```{r, Barnenez Alisson}
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
+
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Mars", "Juin", "Septembre", "Decembre"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023 & Site == "Barnenez"), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024 & Site == "Barnenez"), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+EcoliBarnenezAlisson <- ggplot(subset(dnbecoli_combined, Site == "Barnenez"), aes(x = mois, y = Ecoli, fill = conditions)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(5))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes issues du site de Barnenez", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_light() +
+  theme(strip.text = element_text(size = 16, color = "black"),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+        plot.title = element_text(size = 15),
+        legend.text = element_text(size = 15), 
+        legend.title = element_text(size = 15),
+        axis.title.x = element_text(size = 15),  # Taille de la légende de l'axe des abscisses
+        axis.title.y = element_text(size = 20))  # Taille de la légende de l'axe des ordonnées
+
+print(EcoliBarnenezAlisson)
+
+```
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+# Supprimer la légende de l'axe des ordonnées pour EcoliBarnenezAlisson et ajuster celle de EcoliVerveurAlisson
+EcoliVerveurAlisson <- EcoliVerveurAlisson + theme(axis.title.y = element_text(size = 15))  # Rétablir la légende de l'axe des ordonnées
+
+#EcoliVerveurAlisson <- EcoliVerveurAlisson + 
+  #theme(axis.title.x = element_blank())  # Supprimer la légende de l'axe des abscisses
+#EcoliBarnenezAlisson <- EcoliBarnenezAlisson + 
+  #theme(axis.title.x = element_blank())  
+
+combined_plots <- grid.arrange(
+  EcoliVerveurAlisson + theme(legend.position = "none"),  # Supprimer la légende de EcoliVerveur
+  EcoliBarnenezAlisson + theme(axis.title.y = element_blank()),  # Supprimer la légende de EcoliBarnenez et l'axe des ordonnées
+  ncol = 2,
+  widths = c(1, 1)  # Ajuster la largeur des colonnes à 1 pour qu'elles soient égales
+)
+
+# Afficher la légende de l'axe des ordonnées au centre (peut-être optionnel si vous l'avez supprimée pour EcoliBarnenezAlisson)
+combined_plots <- combined_plots + theme(axis.title.y = element_text(size = 12, color = "black", face = "bold"))
+
+# Imprimer le graphique combiné
+print(combined_plots)
+
+```
+
+
+
+
+
+```{r}
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
+
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023 & Site == "Verveur"), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024 & Site == "Verveur"), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+# Filtrer les données pour ne garder que celles avec la condition "ND"
+dnbecoli_combined_D <- subset(dnbecoli_combined, conditions == "ND")
+
+# Définir une couleur unique pour toutes les barres
+couleur <- "#E69F00"  
+EcoliVerveur <- ggplot(subset(dnbecoli_combined_D, Site == "Verveur"), aes(x = mois, y = Ecoli, fill = conditions)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(dnbecoli_combined_D$Ecoli))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes issues du site de Verveur", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_light() +
+  theme(strip.text = element_text(size = 16, color = "black"),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+        plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 15),  # Taille de la légende de l'axe des abscisses
+        axis.title.y = element_text(size = 20))  # Taille de la légende de l'axe des ordonnées
+print(EcoliVerveur)
+```
+
+```{r}
+library(ggplot2)
+
+dnbecoli <- read.csv2("Dnbecoli.csv")
+
+dnbecoli$Site <- factor(dnbecoli$Site, levels = c("Verveur", "Barnenez")) 
+dnbecoli$conditions <- factor(dnbecoli$conditions, levels = c("ND", "D"))
+
+dnbecoli$mois <- factor(dnbecoli$mois, levels = c("Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"))
+
+dnbecoli_combined <- rbind(
+  transform(subset(dnbecoli, annees == 2023 & Site == "Barnenez"), 
+            mois = factor(paste(mois, "2023", sep = " "), levels = unique(paste(dnbecoli$mois, "2023", sep = " ")))),
+  transform(subset(dnbecoli, annees == 2024 & Site == "Barnenez"), 
+            mois = factor(paste(mois, "2024", sep = " "), levels = unique(paste(dnbecoli$mois, "2024", sep = " "))))
+)
+
+# Trier les mois dans l'ordre chronologique
+dnbecoli_combined$mois <- factor(dnbecoli_combined$mois, levels = unique(dnbecoli_combined$mois))
+
+# Filtrer les données pour ne garder que celles avec la condition "ND"
+dnbecoli_combined_D <- subset(dnbecoli_combined, conditions == "ND")
+
+# Définir une couleur unique pour toutes les barres
+couleur <- "#E69F00"  
+EcoliBarnenez <- ggplot(subset(dnbecoli_combined_D, Site == "Barnenez"), aes(x = mois, y = Ecoli, fill = conditions)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  coord_cartesian(ylim = c(0, max(dnbecoli_combined_D$Ecoli))) +
+  geom_errorbar(aes(ymin = Ecoli - SD, ymax = Ecoli + SD), width = 0.3, 
+                position = position_dodge(width = 0.9)) +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 2.3, yend = 2.3), linetype = "solid", size = 1, color = "green") +
+  geom_segment(aes(x = -Inf, xend = Inf, y = 3.6, yend = 3.6), linetype = "solid", size = 1, color = "red") +
+  labs(title = "Suivi de la contamination en E. coli des palourdes issues du site de Barnenez", 
+       x = "Mois", 
+       y = "Concentration en E. coli (E. coli/100 g de CLI en log10)") +
+  scale_fill_manual(values = c("ND" = "#E69F00", "D" = "#F0E442")) +
+  facet_grid(.~Site) +
+  theme_light() +
+  theme(strip.text = element_text(size = 16, color = "black"),
+        strip.background = element_rect(colour = "black", fill = "white", size = 1.5, linetype = "solid"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+        plot.title = element_text(size = 15),
+        axis.title.x = element_text(size = 15),  # Taille de la légende de l'axe des abscisses
+        axis.title.y = element_text(size = 20))  # Taille de la légende de l'axe des ordonnées
+print(EcoliVerveur)
+```
+
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+EcoliVerveur <- EcoliVerveur + theme(axis.title.y = element_text(size = 15))  
+
+#EcoliVerveurAlisson <- EcoliVerveurAlisson + 
+  #theme(axis.title.x = element_blank())  # Supprimer la légende de l'axe des abscisses
+#EcoliBarnenezAlisson <- EcoliBarnenezAlisson + 
+  #theme(axis.title.x = element_blank())  
+
+combined_plots <- grid.arrange(
+  EcoliVerveur + theme(legend.position = "none"),  # Supprimer la légende de EcoliVerveur
+  EcoliBarnenez + theme(axis.title.y = element_blank()),  # Supprimer la légende de EcoliBarnenez et l'axe des ordonnées
+  ncol = 2,
+  widths = c(1, 1)  # Ajuster la largeur des colonnes à 1 pour qu'elles soient égales
+)
+
+combined_plots <- combined_plots + theme(axis.title.y = element_text(size = 12, color = "black", face = "bold"))
+
+# Imprimer le graphique combiné
+print(combined_plots)
+```
+
+
+
+
 ```{r}
 ggsave("Figures/Ecoli.png", Ecoli, width = 12, height = 6, units = "in")
 ```
+
+
+
 

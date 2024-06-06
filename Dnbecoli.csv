@@ -1,10 +1,6 @@
 T;Site;mois;annees;conditions;Ecoli;SD
-T1;Verveur;Janvier;2023;ND;2,51851394;0,24
-T1;Verveur;Janvier;2023;D;1,653212514;0,31
-T2;Verveur;Fevrier;2023;ND;0;0
-T2;Verveur;Fevrier;2023;D;2,361727836;0,24
 T3;Verveur;Mars;2023;ND;2,69019608;0,26
-T3;Verveur;Mars;2023;D;2,838849091;0,24
+T3;Verveur;Mars;2023;D;0;0
 T3;Barnenez;Mars;2023;ND;2,361727836;0,24
 T3;Barnenez;Mars;2023;D;0;0
 T4;Verveur;Avril;2023;ND;2,69019608;0,26
@@ -34,9 +30,9 @@ T12;Barnenez;Decembre;2023;D;0;0
 T13;Verveur;Janvier;2024;ND;2,892094603;0,25
 T13;Verveur;Janvier;2024;D;0;0
 T14;Verveur;Fevrier;2024;ND;3,973127854;0,22
-T14;Verveur;Fevrier;2024;D;1,301029996;0,44
+T14;Verveur;Fevrier;2024;D;0;0
 T15;Verveur;Mars;2024;ND;4,041392685;0,22
-T15;Verveur;Mars;2024;D;1,653212514;0,31
+T15;Verveur;Mars;2024;D;0;0
 T15;Barnenez;Mars;2024;ND;1,832508913;0,25
 T15;Barnenez;Mars;2024;D;0;0
 T16;Verveur;Avril;2024;ND;3,69019608;0,26
