@@ -547,42 +547,51 @@ print(data_VerveurGDDEP)
 
 
 ```{r, stats sur les sequences}
-# Calculer les moyennes pour all_filtered_dataVerveur
+# Calculer les moyennes et les écarts types pour all_filtered_dataVerveur
 mean_length_verveur <- mean(all_filtered_dataVerveur$length, na.rm = TRUE)
 mean_qcovs_verveur <- mean(all_filtered_dataVerveur$qcovs, na.rm = TRUE)
 mean_pident_verveur <- mean(all_filtered_dataVerveur$pident, na.rm = TRUE)
+sd_length_verveur <- sd(all_filtered_dataVerveur$length, na.rm = TRUE)
+sd_qcovs_verveur <- sd(all_filtered_dataVerveur$qcovs, na.rm = TRUE)
+sd_pident_verveur <- sd(all_filtered_dataVerveur$pident, na.rm = TRUE)
 
-# Afficher les moyennes pour all_filtered_dataVerveur
-cat("Moyennes pour all_filtered_dataVerveur:\n")
-cat("length: ", mean_length_verveur, "\n")
-cat("qcovs: ", mean_qcovs_verveur, "\n")
-cat("pident: ", mean_pident_verveur, "\n\n")
+# Afficher les moyennes et les écarts types pour all_filtered_dataVerveur
+cat("Moyennes et écarts types pour all_filtered_dataVerveur:\n")
+cat("length: ", mean_length_verveur, " (", sd_length_verveur, ")\n")
+cat("qcovs: ", mean_qcovs_verveur, " (", sd_qcovs_verveur, ")\n")
+cat("pident: ", mean_pident_verveur, " (", sd_pident_verveur, ")\n\n")
 
-# Calculer les moyennes pour all_filtered_dataBarnenez
+# Calculer les moyennes et les écarts types pour all_filtered_dataBarnenez
 mean_length_barnenez <- mean(all_filtered_dataBarnenez$length, na.rm = TRUE)
 mean_qcovs_barnenez <- mean(all_filtered_dataBarnenez$qcovs, na.rm = TRUE)
 mean_pident_barnenez <- mean(all_filtered_dataBarnenez$pident, na.rm = TRUE)
+sd_length_barnenez <- sd(all_filtered_dataBarnenez$length, na.rm = TRUE)
+sd_qcovs_barnenez <- sd(all_filtered_dataBarnenez$qcovs, na.rm = TRUE)
+sd_pident_barnenez <- sd(all_filtered_dataBarnenez$pident, na.rm = TRUE)
 
-# Afficher les moyennes pour all_filtered_dataBarnenez
-cat("Moyennes pour all_filtered_dataBarnenez:\n")
-cat("length: ", mean_length_barnenez, "\n")
-cat("qcovs: ", mean_qcovs_barnenez, "\n")
-cat("pident: ", mean_pident_barnenez, "\n\n")
+# Afficher les moyennes et les écarts types pour all_filtered_dataBarnenez
+cat("Moyennes et écarts types pour all_filtered_dataBarnenez:\n")
+cat("length: ", mean_length_barnenez, " (", sd_length_barnenez, ")\n")
+cat("qcovs: ", mean_qcovs_barnenez, " (", sd_qcovs_barnenez, ")\n")
+cat("pident: ", mean_pident_barnenez, " (", sd_pident_barnenez, ")\n\n")
 
 # Combiner les deux dataframes
 combined_data <- rbind(all_filtered_dataVerveur, all_filtered_dataBarnenez)
 
-# Calculer les moyennes pour le dataframe combiné
+# Calculer les moyennes et les écarts types pour le dataframe combiné
 mean_length_combined <- mean(combined_data$length, na.rm = TRUE)
 mean_qcovs_combined <- mean(combined_data$qcovs, na.rm = TRUE)
 mean_pident_combined <- mean(combined_data$pident, na.rm = TRUE)
+sd_length_combined <- sd(combined_data$length, na.rm = TRUE)
+sd_qcovs_combined <- sd(combined_data$qcovs, na.rm = TRUE)
+sd_pident_combined <- sd(combined_data$pident, na.rm = TRUE)
 
-# Afficher les moyennes pour le dataframe combiné
+# Afficher les moyennes et les écarts types pour le dataframe combiné
+cat("Moyennes et écarts types pour les deux sites combinés:\n")
+cat("Length: ", mean_length_combined, " (", sd_length_combined, ")\n")
+cat("Qcovs: ", mean_qcovs_combined, " (", sd_qcovs_combined, ")\n")
+cat("Pident: ", mean_pident_combined, " (", sd_pident_combined, ")\n")
 
-cat("Moyennes pour les deux sites combinés:\n")
-cat("Length: ", mean_length_combined, "\n")
-cat("Qcovs: ", mean_qcovs_combined, "\n")
-cat("Pident: ", mean_pident_combined, "\n")
 ```
 
 ```{r, Sauvegarder data_BarnenezGDND au format CSV}
@@ -968,7 +977,7 @@ heatmap_data_class <- rbind(heatmap_dataclass_BarnenezGDND, heatmap_dataclass_Ba
 heatmap_data_class$Condition <- factor(heatmap_data_class$Condition, levels = c("BarnenezGDDEP", "BarnenezGDND", "BarnenezSedi", "BarnenezEau", "VerveurGDDEP", "VerveurGDND", "VerveurSedi", "VerveurEau"))
 
 # Spécifier l'ordre arbitraire des niveaux du facteur 'class'
-arbitrary_order <- c("Alphaproteobacteria", "Betaproteobacteria", "Gammaproteobacteria", "Actinomycetes", "Bacilli", "Cytophagia", "Flavobacteriia", "Sphingobacteriia")  # Remplacer par l'ordre désiré
+arbitrary_order <- c("Gammaproteobacteria", "Flavobacteriia", "Bacilli", "Cytophagia", "Actinomycetes", "Alphaproteobacteria", "Betaproteobacteria",  "Sphingobacteriia")  # Remplacer par l'ordre désiré
 heatmap_data_class$class <- factor(heatmap_data_class$class, levels = arbitrary_order)
 
 separation_position_y <- 4.5  
@@ -979,16 +988,17 @@ heatmap_plot_class <- ggplot(heatmap_data_class, aes(x = class, y = Condition, f
   geom_text(aes(label = count), vjust = 0.5, color = "white", size = 6) +  # Augmenter la taille de la police dans les étiquettes
   scale_fill_gradient(low = "skyblue", high = "darkblue") +
   labs(title = "Heatmap de présence des classes bactériens - Verveur et Barnenez", 
-       x = "Classes", 
+       x = "Classes bactériennes", 
        y = "Compartiments",
-       fill = "Nombre de\nsouches :") +  # Changer la légende
-  annotate("text", x = 1, y = 8.7, size = 6,label = "n=6 (4%)", color = "black") +
-  annotate("text", x = 2, y = 8.7, size = 6,label = "n=1 (<1%)", color = "black") +
-  annotate("text", x = 3, y = 8.7, size = 6,label = "n=81 (55%)", color = "black") +
+       fill = "Nombre 
+d'isolats :") +  # Changer la légende
+  annotate("text", x = 6, y = 8.7, size = 6,label = "n=6 (4%)", color = "black") +
+  annotate("text", x = 7, y = 8.7, size = 6,label = "n=1 (<1%)", color = "black") +
+  annotate("text", x = 1, y = 8.7, size = 6,label = "n=81 (55%)", color = "black") +
   annotate("text", x = 4, y = 8.7, size = 6,label = "n=9 (6%)", color = "black") +
-  annotate("text", x = 5, y = 8.7, size = 6,label = "n=19 (13%)", color = "black") +
-  annotate("text", x = 6, y = 8.7, size = 6,label = "n=9 (6%)", color = "black") +
-  annotate("text", x = 7, y = 8.7, size = 6,label = "n=19 (13%)", color = "black") +
+  annotate("text", x = 2, y = 8.7, size = 6,label = "n=19 (13%)", color = "black") +
+  annotate("text", x = 5, y = 8.7, size = 6,label = "n=9 (6%)", color = "black") +
+  annotate("text", x = 3, y = 8.7, size = 6,label = "n=19 (13%)", color = "black") +
   annotate("text", x = 8, y = 8.7, size = 6,label = "n=1 (<1%)", color = "black") +
   scale_y_discrete(expand = expand_scale(mult = c(0, 0.13)))+
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 25),  # Ajuster la taille de la police des abscisses
@@ -1102,34 +1112,34 @@ bar_plot_combinedgenresclasses <- ggplot(top_genres_combined3, aes(x = reorder(G
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(data = subset(top_genres_combined3, duplicated_genus == FALSE), aes(label = Label), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 7) +
   geom_text(data = subset(top_genres_combined3, duplicated_genus == TRUE), aes(label = symbol, x = Genus, y = symbol_y_pos + 0.9), color = "black", size = 7) +
-  labs(title = "Genres retrouvés sur les sites de Verveur et Barnenez", x = NULL, y = "Nombre de souches") +
+  labs(title = "Genres retrouvés sur les sites de Verveur et Barnenez", x = NULL, y = "Nombre d'isolats") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
   scale_fill_manual(values = c("Barnenez" = "#145C9E", "Verveur" = "#59C9A5")) +
   scale_y_continuous(labels = scales::comma, breaks = seq(0, 15, 1), limits = c(0, 16)) +
-  annotate("text", x = 1, y = 16, size = 3, label = "9.65%", color = "black") +
-  annotate("text", x = 2, y = 13, size = 3, label = "12.4%", color = "black") +
-  annotate("text", x = 3, y = 10, size = 3, label = "5.5%", color = "black") +
-  annotate("text", x = 4, y = 10, size = 3, label = "9%", color = "black") +
-  annotate("text", x = 5, y = 8, size = 3, label = "6.2%", color = "black") +
-  annotate("text", x = 6, y = 6, size = 3, label = "2.75%", color = "black") +
-  annotate("text", x = 7, y = 6, size = 3, label = "5.5%", color = "black") +
-  annotate("text", x = 8, y = 7, size = 3, label = "5.5%", color = "black") +
-  annotate("text", x = 9, y = 6, size = 3, label = "4.1%", color = "black") +
-  annotate("text", x = 10, y = 5, size = 3, label = "4.1%", color = "black") +
-  annotate("text", x = 11, y = 5, size = 3, label = "2%", color = "black") +
-  annotate("text", x = 12, y = 5, size = 3, label = "2%", color = "black") +
-  annotate("text", x = 13, y = 6, size = 3, label = "3.4%", color = "black") +
-  annotate("text", x = 14, y = 4, size = 3, label = "2.75%", color = "black") +
-  annotate("text", x = 15, y = 4, size = 3, label = "1.4%", color = "black") +
-  annotate("text", x = 16, y = 4, size = 3, label = "1.4%", color = "black") +
-  annotate("text", x = 17, y = 4, size = 3, label = "1.4%", color = "black") +
-  annotate("text", x = 18, y = 4, size = 3, label = "2%", color = "black") +
+  annotate("text", x = 1, y = 16, size = 4, label = "9.65%", color = "black") +
+  annotate("text", x = 2, y = 13, size = 4, label = "12.4%", color = "black") +
+  annotate("text", x = 3, y = 10, size = 4, label = "5.5%", color = "black") +
+  annotate("text", x = 4, y = 10, size = 4, label = "9%", color = "black") +
+  annotate("text", x = 5, y = 8, size = 4, label = "6.2%", color = "black") +
+  annotate("text", x = 6, y = 6, size = 4, label = "2.75%", color = "black") +
+  annotate("text", x = 7, y = 6, size = 4, label = "5.5%", color = "black") +
+  annotate("text", x = 8, y = 7, size = 4, label = "5.5%", color = "black") +
+  annotate("text", x = 9, y = 6, size = 4, label = "4.1%", color = "black") +
+  annotate("text", x = 10, y = 5, size = 4, label = "4.1%", color = "black") +
+  annotate("text", x = 11, y = 5, size = 4, label = "2%", color = "black") +
+  annotate("text", x = 12, y = 5, size = 4, label = "2%", color = "black") +
+  annotate("text", x = 13, y = 6, size = 4, label = "3.4%", color = "black") +
+  annotate("text", x = 14, y = 4, size = 4, label = "2.75%", color = "black") +
+  annotate("text", x = 15, y = 4, size = 4, label = "1.4%", color = "black") +
+  annotate("text", x = 16, y = 4, size = 4, label = "1.4%", color = "black") +
+  annotate("text", x = 17, y = 4, size = 4, label = "1.4%", color = "black") +
+  annotate("text", x = 18, y = 4, size = 4, label = "2%", color = "black") +
   #bracket
   annotate("segment", x = 19, xend = 19, y = 2.2, yend = 2.5, size = 0.5, color = "black") + #barre de gauche
   annotate("segment", x = 19, xend = 44, y = 2.5, yend = 2.5, size = 0.5, color = "black") + #barre longueur
   annotate("segment", x = 44, xend = 44, y = 2.2, yend = 2.5, size = 0.5, color = "black") + #barre de droite
   annotate("segment", x = 31, xend = 31, y = 2.5, yend = 2.8, size = 0.5, color = "black") + #petite barre milieu
-  annotate("text", x = 31, y = 3.2, size = 3, label = "18.6%", color = "black") + #texte au dessus du bracket
+  annotate("text", x = 31, y = 3.2, size = 4, label = "18.6%", color = "black") + #texte au dessus du bracket
   theme(legend.position = "right", 
         legend.text = element_text(size = 20), 
         axis.title.y = element_text(size = 25), 
@@ -1137,14 +1147,14 @@ bar_plot_combinedgenresclasses <- ggplot(top_genres_combined3, aes(x = reorder(G
         plot.title = element_text(size = 25, hjust = 0.5)) + 
   guides(fill = guide_legend(title = "Sites:", title.theme = element_text(size = 20)))
 
-#Légende symboles pour classes bactérienne 
+#Légende symboles pour classes bactériennes 
 legend_text <- paste(names(class_symbols), class_symbols, sep = ": ")
 legend_text <- paste(legend_text, collapse = "\n")
-legend_title <- "Classes bactérienne :"
+legend_title <- "Classes bactériennes :"
 # Concaténer les textes avec le titre de la légende
 legend_text <- paste(legend_title, "\n", legend_text)
 bar_plot_combinedgenresclasses <- bar_plot_combinedgenresclasses + 
-  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 5, color = "black", parse = FALSE)
+  annotate("text", x = Inf, y = Inf, label = legend_text, hjust = 1, vjust = 1, size = 7, color = "black", parse = FALSE)
 
 # Définir l'ordre désiré pour les genres
 order_genus <- c("Pseudomonas", "Pseudoalteromonas", "Cobetia", "Vibrio", "Algoriphagus", "Flavobacterium", "Pseudalkalibacillus", "Shewanella", "Bacillus", "Paraglaciecola", "Salinibacterium", "Winogradskyella", "Rahnella", "Cellulophaga", "Pseudovibrio", "Rheinheimera", "Zobellia", "Microbacterium", "Aliiglaciecola", "Carnobacterium", "Cellvibrio", "Cytobacillus", "Demequina", "Formosa", "Hydrogenophaga", "Marinagarivorans", "Metabacillus", "Motilimonas", "Niallia", "Nonlabens", "Olleya", "Paracoccus", "Pedobacter", "Peribacillus", "Plantibacter", "Polaribacter", "Pseudocolwellia", "Pseudorhodobacter", "Pseudosulfitobacter", "Psychromonas", "Sanguibacter", "Stenotrophomonas", "Tenacibaculum", "Yoonia")
@@ -1159,8 +1169,8 @@ heatmap_plot_genus_ordered <- ggplot(heatmap_data_genus, aes(x = genus, y = Cond
   geom_tile() +
   geom_text(aes(label = count), vjust = 0.5, color = "white") +  
   scale_fill_gradient(low = "skyblue", high = "darkblue", name = "Nombre 
-de souches :") + # Modifier le titre de la légende
-  labs(x = "Genres", y = "Compartiments") +
+d'isolats :") + # Modifier le titre de la légende
+  labs(x = "Genres bacteriens", y = "Compartiments") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 20), # genres
         axis.text.y = element_text(size = 15), # légende heatmap axe des ordonnées
         plot.title = element_text(hjust = 0.5),
