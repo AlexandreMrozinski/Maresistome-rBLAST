@@ -171,16 +171,111 @@ sd_qcovs<- sd(data$qcovs, na.rm = TRUE)
 sd_pident <- sd(data$pident, na.rm = TRUE)
 
 # Afficher les moyennes et les écarts types pour all_filtered_dataVerveur
-cat("Moyennes et écarts types")
+cat("Moyennes et écarts types ")
 cat("length: ", mean_length, " (", sd_length, ")\n")
 cat("qcovs: ", mean_qcovs, " (", sd_qcovs, ")\n")
 cat("pident: ", mean_pident, " (", sd_pident, ")\n\n")
 ```
 
 
+```{r, data en supprimant les doublon, garde la première occurence}
+# Filtrage des colonnes nécessaires
+datatrim <- subset(filtered_cltax, 
+                  select=c(qseqid, superkingdom, phylum, class, order, family, genus, species, pident, evalue, qcovs, length))
+
+# Définition du chemin du dossier
+chemin_du_dossier <- "/Users/amrozins/Documents/workflow/Sequences/Manon B/trim"
+
+# Fonction pour récupérer les séquences FASTA
+fasta <- function(qseqid, chemin_du_dossier) {
+    pattern <- paste0("^", gsub("\\.ab1$", "", qseqid), ".*\\.fa$")
+    fichiers <- list.files(chemin_du_dossier, pattern = pattern, full.names = TRUE, ignore.case = TRUE)
+    
+    if (length(fichiers) > 0) {
+        seqs <- readDNAStringSet(fichiers[1], format = "fasta")
+        return(as.character(seqs))
+    } else {
+        cat("Aucun fichier correspondant trouvé pour :", qseqid, "\n")
+        return(NA)
+    }
+}
+
+# Ajout des séquences et de leur longueur
+datatrim$sequence <- sapply(datatrim$qseqid, fasta, chemin_du_dossier)
+datatrim$longueur_sequence_pb <- sapply(datatrim$sequence, function(seq) ifelse(is.na(seq), NA, nchar(seq)))
+
+# Réarrangement des colonnes
+datatrim <- datatrim[, c(names(data)[names(data) != "sequence"], "sequence")]
+
+# Suppression des doublons basés sur la colonne qseqid
+datatrim <- data[!duplicated(data$qseqid), ]
+
+# Affichage du résultat
+print(datatrim)
+
+```
+
+```{r, stats sur datatrim}
+# Calculer les moyennes et les écarts types
+mean_length <- mean(datatrim$length, na.rm = TRUE)
+mean_qcovs <- mean(datatrim$qcovs, na.rm = TRUE)
+mean_pident <- mean(datatrim$pident, na.rm = TRUE)
+sd_length <- sd(datatrim$length, na.rm = TRUE)
+sd_qcovs<- sd(datatrim$qcovs, na.rm = TRUE)
+sd_pident <- sd(datatrim$pident, na.rm = TRUE)
+
+# Afficher les moyennes et les écarts types pour all_filtered_dataVerveur
+cat("Moyennes et écarts types
+    ")
+cat("length: ", mean_length, " (", sd_length, ")\n")
+cat("qcovs: ", mean_qcovs, " (", sd_qcovs, ")\n")
+cat("pident: ", mean_pident, " (", sd_pident, ")\n\n")
+```
+
+```{r}
+# Tableau de comptage des genres
+genres <- table(datatrim$genus)
+
+# Compter le nombre total de genres
+total_genres <- length(unique(datatrim$genus))
+
+# Créez le graphique à barres
+bar_plot <- ggplot(data.frame(Genus = names(genres), Count = as.numeric(genres)), 
+                   aes(x = reorder(Genus, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "#145C9E") +
+  geom_text(aes(label = Count), vjust = -0.5, color = "black", size = 3.5) +  # Ajouter les valeurs au-dessus de chaque barre
+  labs(title = "Genres retrouvés", x = "Genres", y = "Nombre d'e séquences'isolats") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(breaks = seq(0, 10, by = 1), limits = c(0, 10)) +  # Régler les valeurs de l'axe des ordonnées
+  annotate("text", x = 15, y = 9.5, label = paste("Total de séquences :", nrow(datatrim)), hjust = 1, vjust = 1) +
+  annotate("text", x = 15, y = 9, label = paste("Nombre total de genres :", total_genres), hjust = 1, vjust = 0.95) # Ajouter le nombre total de genres
+
+print(bar_plot)
+```
 
 
 
+```{r, classes}
+class_counts <- table(datatrim$class)
+
+bar_plot_classes <- ggplot(data.frame(Class = names(class_counts), Count = as.numeric(class_counts)), 
+                              aes(x = reorder(Class, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "#59C9A5") +
+  geom_text(aes(label = Count), position = position_dodge(width = 0.9), vjust = -0.5, color = "black", size = 3.5) +
+  labs(title = "Classes retrouvées", x = "Class", y = "Nombre d'isolats") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  # Ajout de l'annotation pour le nombre total de séquences
+  annotate("text", x = Inf, y = -Inf, label = paste("Total d'isolats :", nrow(datatrim)), hjust = 1, vjust = 0)
+
+print(bar_plot_classes)
+```
 
 
+
+```{r}
+write.csv(data, "/Users/amrozins/Documents/workflow/Résultats/rBlastARN/data.csv", row.names = FALSE)
+write.csv(datatrim, "/Users/amrozins/Documents/workflow/Résultats/rBlastARN/datatrim.csv", row.names = FALSE)
+ggsave("/Users/amrozins/Documents/workflow/Résultats/rBlastARN/bar_plot.png", bar_plot, width = 10, height = 6, units = "in")
+ggsave("/Users/amrozins/Documents/workflow/Résultats/rBlastARN/bar_plot_classes.png", bar_plot_classes, width = 10, height = 6, units = "in")
+```
 
