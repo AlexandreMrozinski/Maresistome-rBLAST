@@ -232,7 +232,7 @@ cat("qcovs: ", mean_qcovs, " (", sd_qcovs, ")\n")
 cat("pident: ", mean_pident, " (", sd_pident, ")\n\n")
 ```
 
-```{r}
+```{r, genres}
 # Tableau de comptage des genres
 genres <- table(datatrim$genus)
 
